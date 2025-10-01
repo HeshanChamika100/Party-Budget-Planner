@@ -2,7 +2,17 @@ import React from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-const PDFGenerator = ({ items, people, totalCost, perPerson }) => {
+const PDFGenerator = ({ 
+  items, 
+  alcoholicPeople, 
+  nonAlcoholicPeople, 
+  totalCost, 
+  totalAlcoholicCost, 
+  totalNonAlcoholicCost, 
+  alcoholicCostPerPerson, 
+  nonAlcoholicCostPerPerson 
+}) => {
+  const totalPeople = alcoholicPeople + nonAlcoholicPeople;
 
   // JPG Generation Function
   const generateJPGReport = async () => {
@@ -37,18 +47,24 @@ const PDFGenerator = ({ items, people, totalCost, perPerson }) => {
           📊 BUDGET SUMMARY
         </h2>
         <div style="background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0;">
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
             <div style="text-align: center;">
-              <div style="color: #666; font-size: 12px; margin-bottom: 5px;">👥 Number of People</div>
-              <div style="color: #333; font-size: 24px; font-weight: bold;">${people}</div>
+              <div style="color: #666; font-size: 12px; margin-bottom: 5px;">👥 Total People</div>
+              <div style="color: #333; font-size: 20px; font-weight: bold;">${totalPeople}</div>
             </div>
             <div style="text-align: center;">
               <div style="color: #666; font-size: 12px; margin-bottom: 5px;">💰 Total Cost</div>
-              <div style="color: #059669; font-size: 24px; font-weight: bold;">Rs.${totalCost.toLocaleString()}</div>
+              <div style="color: #7c3aed; font-size: 20px; font-weight: bold;">Rs.${totalCost.toLocaleString()}</div>
             </div>
             <div style="text-align: center;">
-              <div style="color: #666; font-size: 12px; margin-bottom: 5px;">👤 Cost per Person</div>
-              <div style="color: #2563eb; font-size: 24px; font-weight: bold;">Rs.${parseFloat(perPerson).toLocaleString()}</div>
+              <div style="color: #666; font-size: 12px; margin-bottom: 5px;">🍺 Alcoholic (${alcoholicPeople})</div>
+              <div style="color: #7c3aed; font-size: 16px; font-weight: bold;">Rs.${totalAlcoholicCost.toLocaleString()}</div>
+              ${alcoholicPeople > 0 ? `<div style="color: #666; font-size: 10px;">Per person: Rs.${alcoholicCostPerPerson.toLocaleString()}</div>` : ''}
+            </div>
+            <div style="text-align: center;">
+              <div style="color: #666; font-size: 12px; margin-bottom: 5px;">🥤 Non-Alcoholic (${nonAlcoholicPeople})</div>
+              <div style="color: #059669; font-size: 16px; font-weight: bold;">Rs.${totalNonAlcoholicCost.toLocaleString()}</div>
+              ${nonAlcoholicPeople > 0 ? `<div style="color: #666; font-size: 10px;">Per person: Rs.${nonAlcoholicCostPerPerson.toLocaleString()}</div>` : ''}
             </div>
           </div>
         </div>
@@ -59,8 +75,9 @@ const PDFGenerator = ({ items, people, totalCost, perPerson }) => {
           🛍️ PARTY ITEMS BREAKDOWN
         </h2>
         <div style="overflow: hidden; border-radius: 10px; border: 1px solid #e2e8f0;">
-          <div style="background: linear-gradient(to right, #7c3aed, #ec4899); color: white; padding: 15px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 15px; font-weight: bold; font-size: 14px;">
+          <div style="background: linear-gradient(to right, #7c3aed, #ec4899); color: white; padding: 15px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px; font-weight: bold; font-size: 13px;">
             <div>Item Name</div>
+            <div style="text-align: center;">Type</div>
             <div style="text-align: center;">Unit Price (Rs.)</div>
             <div style="text-align: center;">Quantity</div>
             <div style="text-align: center;">Total (Rs.)</div>
@@ -68,12 +85,15 @@ const PDFGenerator = ({ items, people, totalCost, perPerson }) => {
           ${items.map((item, index) => {
             const itemTotal = item.unitPrice * item.quantity;
             const itemName = item.name || `Item ${index + 1}`;
+            const itemType = item.isAlcoholic ? '🍺 Alcoholic' : '🥤 Non-Alc';
+            const bgColor = item.isAlcoholic ? '#fdf4ff' : index % 2 === 0 ? '#ffffff' : '#f8fafc';
             return `
-              <div style="padding: 15px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 15px; border-bottom: 1px solid #e2e8f0; background: ${index % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+              <div style="padding: 12px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px; border-bottom: 1px solid #e2e8f0; background: ${bgColor};">
                 <div style="font-weight: 500;">${itemName}</div>
+                <div style="text-align: center; font-size: 12px;">${itemType}</div>
                 <div style="text-align: center;">${item.unitPrice.toLocaleString()}</div>
                 <div style="text-align: center;">${item.quantity}</div>
-                <div style="text-align: center; font-weight: bold; color: #059669;">${itemTotal.toLocaleString()}</div>
+                <div style="text-align: center; font-weight: bold; color: ${item.isAlcoholic ? '#7c3aed' : '#059669'};">${itemTotal.toLocaleString()}</div>
               </div>
             `;
           }).join('')}
@@ -91,8 +111,8 @@ const PDFGenerator = ({ items, people, totalCost, perPerson }) => {
           <h3 style="color: #475569; font-size: 14px; margin-bottom: 15px; font-weight: bold;">ADDITIONAL INFORMATION:</h3>
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; font-size: 12px; color: #64748b;">
             <div>• Total number of items: ${items.length}</div>
-            <div>• Average cost per item: Rs.${items.length > 0 ? (totalCost / items.length).toFixed(2) : '0'}</div>
-            <div>• Budget per person: Rs.${parseFloat(perPerson).toLocaleString()}</div>
+            <div>• Alcoholic people: ${alcoholicPeople} (Cost per person: Rs.${alcoholicPeople > 0 ? alcoholicCostPerPerson.toLocaleString() : '0'})</div>
+            <div>• Non-alcoholic people: ${nonAlcoholicPeople} (Cost per person: Rs.${nonAlcoholicPeople > 0 ? nonAlcoholicCostPerPerson.toLocaleString() : '0'})</div>
             <div>• Generated by Party Budget Planner</div>
           </div>
         </div>
@@ -144,53 +164,75 @@ const PDFGenerator = ({ items, people, totalCost, perPerson }) => {
     doc.setDrawColor(200, 200, 200);
     doc.line(20, 50, 190, 50);
 
-    // Summary section
-    doc.setFontSize(16);
+    // Summary section - more compact
+    doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);
     doc.text('BUDGET SUMMARY', 20, 65);
 
+    // Create a more compact layout using columns
+    doc.setFontSize(10);
+    
+    // Left column - People & Total Cost
+    doc.text(`Total People: ${totalPeople} (Alcoholic: ${alcoholicPeople}, Non-Alcoholic: ${nonAlcoholicPeople})`, 20, 78);
     doc.setFontSize(12);
-    doc.text(`Number of People: ${people}`, 20, 80);
+    doc.setTextColor(0, 128, 0);
     doc.text(`Total Cost: Rs.${totalCost.toLocaleString()}`, 20, 90);
-    doc.text(`Cost per Person: Rs.${parseFloat(perPerson).toLocaleString()}`, 20, 100);
+    
+    // Costs breakdown in two columns
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Alcoholic Cost: Rs.${totalAlcoholicCost.toLocaleString()}`, 20, 105);
+    if (alcoholicPeople > 0) {
+      doc.text(`Per person: Rs.${alcoholicCostPerPerson.toLocaleString()}`, 110, 105);
+    }
+    
+    doc.text(`Non-Alcoholic Cost: Rs.${totalNonAlcoholicCost.toLocaleString()}`, 20, 115);
+    if (nonAlcoholicPeople > 0) {
+      doc.text(`Per person: Rs.${nonAlcoholicCostPerPerson.toLocaleString()}`, 110, 115);
+    }
 
-    // Items section
-    doc.setFontSize(16);
-    doc.text('PARTY ITEMS BREAKDOWN', 20, 120);
+    // Items section - moved up due to compact summary
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text('PARTY ITEMS BREAKDOWN', 20, 135);
 
     // Table headers
     doc.setFontSize(10);
     doc.setTextColor(128, 0, 128);
-    doc.text('Item Name', 20, 135);
-    doc.text('Unit Price (Rs.)', 80, 135);
-    doc.text('Quantity', 130, 135);
-    doc.text('Total (Rs.)', 160, 135);
+    doc.text('Item Name', 20, 150);
+    doc.text('Type', 70, 150);
+    doc.text('Unit Price (Rs.)', 100, 150);
+    doc.text('Quantity', 140, 150);
+    doc.text('Total (Rs.)', 165, 150);
 
     // Add line under headers
     doc.setDrawColor(128, 0, 128);
-    doc.line(20, 138, 190, 138);
+    doc.line(20, 153, 190, 153);
 
     // Add items
     doc.setTextColor(0, 0, 0);
-    let yPosition = 150;
+    let yPosition = 165;
     
     items.forEach((item, index) => {
-      if (yPosition > 270) { // Check if we need a new page
+      if (yPosition > 260) { // Check if we need a new page
         doc.addPage();
         // Add header on new page
-        doc.setFontSize(16);
-        doc.setTextColor(128, 0, 128);
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
         doc.text('PARTY ITEMS BREAKDOWN (Continued)', 20, 30);
         
         // Table headers on new page
         doc.setFontSize(10);
-        doc.text('Item Name', 20, 45);
-        doc.text('Unit Price (Rs.)', 80, 45);
-        doc.text('Quantity', 130, 45);
-        doc.text('Total (Rs.)', 160, 45);
-        doc.line(20, 48, 190, 48);
+        doc.setTextColor(128, 0, 128);
+        doc.text('Item Name', 20, 40);
+        doc.text('Type', 70, 40);
+        doc.text('Unit Price (Rs.)', 100, 40);
+        doc.text('Quantity', 140, 40);
+        doc.text('Total (Rs.)', 165, 40);
+        doc.setDrawColor(128, 0, 128);
+        doc.line(20, 43, 190, 43);
         
-        yPosition = 60;
+        yPosition = 55;
         doc.setTextColor(0, 0, 0);
       }
       
@@ -198,12 +240,14 @@ const PDFGenerator = ({ items, people, totalCost, perPerson }) => {
       const itemName = item.name || `Item ${index + 1}`;
       
       // Truncate long item names if necessary
-      const truncatedName = itemName.length > 25 ? itemName.substring(0, 22) + '...' : itemName;
+      const truncatedName = itemName.length > 20 ? itemName.substring(0, 17) + '...' : itemName;
       
+      doc.setFontSize(10);
       doc.text(truncatedName, 20, yPosition);
-      doc.text(item.unitPrice.toLocaleString(), 80, yPosition);
-      doc.text(item.quantity.toString(), 130, yPosition);
-      doc.text(itemTotal.toLocaleString(), 160, yPosition);
+      doc.text(item.isAlcoholic ? 'Alcoholic' : 'Non-Alc', 70, yPosition);
+      doc.text(item.unitPrice.toLocaleString(), 100, yPosition);
+      doc.text(item.quantity.toString(), 140, yPosition);
+      doc.text(itemTotal.toLocaleString(), 165, yPosition);
       yPosition += 12;
     });
 
@@ -219,16 +263,16 @@ const PDFGenerator = ({ items, people, totalCost, perPerson }) => {
     doc.text(`GRAND TOTAL: Rs.${totalCost.toLocaleString()}`, 20, yPosition);
     
     // Add additional summary information
-    yPosition += 20;
+    yPosition += 10;
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
     doc.text('ADDITIONAL INFORMATION:', 20, yPosition);
-    yPosition += 12;
+    yPosition += 8;
     doc.text(`- Total number of items: ${items.length}`, 25, yPosition);
     yPosition += 10;
-    doc.text(`- Average cost per item: Rs.${items.length > 0 ? (totalCost / items.length).toFixed(2) : '0'}`, 25, yPosition);
+    doc.text(`- Alcoholic people cost per person: Rs.${alcoholicPeople > 0 ? alcoholicCostPerPerson.toLocaleString() : '0'}`, 25, yPosition);
     yPosition += 10;
-    doc.text(`- Budget per person: Rs.${parseFloat(perPerson).toLocaleString()}`, 25, yPosition);
+    doc.text(`- Non-alcoholic people cost per person: Rs.${nonAlcoholicPeople > 0 ? nonAlcoholicCostPerPerson.toLocaleString() : '0'}`, 25, yPosition);
 
     // Add footer to all pages
     const pageCount = doc.internal.getNumberOfPages();
@@ -236,8 +280,8 @@ const PDFGenerator = ({ items, people, totalCost, perPerson }) => {
       doc.setPage(i);
       doc.setFontSize(8);
       doc.setTextColor(150, 150, 150);
-      doc.text(`Generated by Party Budget Planner - Page ${i} of ${pageCount}`, 20, 285);
-      doc.text('For more party planning tools, visit our website', 20, 290);
+      doc.text(`Generated by Party Budget Planner - Page ${i} of ${pageCount}`, 140, 285);
+      doc.text('For more party planning tools, visit our website', 140, 290);
     }
 
     // Save the PDF with a clean filename

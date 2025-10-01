@@ -1,25 +1,32 @@
 import React, { useState } from "react";
 import Footer from "./components/Footer";
-import PDFGenerator from "./components/PDFGenerator";
+import PDFGenerator from './components/PDFGenerator';
 
 function App() {
   const [items, setItems] = useState([
-    { name: "Chicken", unitPrice: 1100, quantity: 10 },
-    { name: "Seasoning", unitPrice: 380, quantity: 3 },
-    { name: "Charcoal", unitPrice: 1000, quantity: 1 },
-    { name: "Beverages", unitPrice: 3000, quantity: 1 },
+    { name: "Chicken", unitPrice: 1100, quantity: 10, isAlcoholic: false },
+    { name: "Seasoning", unitPrice: 380, quantity: 3, isAlcoholic: false },
+    { name: "Charcoal", unitPrice: 1000, quantity: 1, isAlcoholic: false },
+    { name: "Beer", unitPrice: 3000, quantity: 1, isAlcoholic: true },
   ]);
 
-  const [people, setPeople] = useState(13);
+  const [alcoholicPeople, setAlcoholicPeople] = useState(9);
+  const [nonAlcoholicPeople, setNonAlcoholicPeople] = useState(4);
 
   const handleChange = (index, field, value) => {
     const newItems = [...items];
-    newItems[index][field] = field === "name" ? value : Number(value);
+    if (field === "name") {
+      newItems[index][field] = value;
+    } else if (field === "isAlcoholic") {
+      newItems[index][field] = value;
+    } else {
+      newItems[index][field] = Number(value);
+    }
     setItems(newItems);
   };
 
   const addItem = () => {
-    setItems([...items, { name: "", unitPrice: 0, quantity: 1 }]);
+    setItems([...items, { name: "", unitPrice: 0, quantity: 1, isAlcoholic: false }]);
   };
 
   const removeItem = (index) => {
@@ -27,11 +34,24 @@ function App() {
     setItems(newItems);
   };
 
-  const totalCost = items.reduce(
-    (sum, item) => sum + item.unitPrice * item.quantity,
-    0
-  );
-  const perPerson = people > 0 ? (totalCost / people).toFixed(2) : 0;
+  // Advanced cost calculations
+  const totalPeople = alcoholicPeople + nonAlcoholicPeople;
+  
+  const totalAlcoholicCost = items
+    .filter(item => item.isAlcoholic)
+    .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+    
+  const totalNonAlcoholicCost = items
+    .filter(item => !item.isAlcoholic)
+    .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+    
+  const totalCost = totalAlcoholicCost + totalNonAlcoholicCost;
+  
+  // Cost calculations per person type
+  const nonAlcoholicCostPerPerson = totalPeople > 0 ? (totalNonAlcoholicCost / totalPeople) : 0;
+  const alcoholicCostPerPerson = totalPeople > 0 && alcoholicPeople > 0 
+    ? (totalNonAlcoholicCost / totalPeople) + (totalAlcoholicCost / alcoholicPeople)
+    : nonAlcoholicCostPerPerson;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 p-2 sm:p-4">
@@ -129,6 +149,29 @@ function App() {
                       </div>
                     </div>
                     
+                    {/* Alcoholic Toggle */}
+                    <div className="bg-purple-50 p-3 rounded-xl border border-purple-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-600 flex items-center">
+                          🍺 Alcoholic Item?
+                        </span>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={item.isAlcoholic}
+                            onChange={(e) => handleChange(index, "isAlcoholic", e.target.checked)}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                        </label>
+                      </div>
+                      {item.isAlcoholic && (
+                        <p className="text-xs text-purple-600 mt-1">
+                          This cost will be shared only among drinkers
+                        </p>
+                      )}
+                    </div>
+                    
                     <div className="bg-green-50 p-3 rounded-xl border border-green-200">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium text-gray-600">🧮 Total:</span>
@@ -150,13 +193,14 @@ function App() {
                     <th className="p-3 lg:p-4 text-left font-semibold text-sm lg:text-base">🛍️ Item</th>
                     <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">💰 Unit Price</th>
                     <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">📦 Quantity</th>
+                    <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">🍺 Alcoholic</th>
                     <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">🧮 Total</th>
                     <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">⚡ Action</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white">
                   {items.map((item, index) => (
-                    <tr key={index} className="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200">
+                    <tr key={index} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 ${item.isAlcoholic ? 'bg-purple-50/30' : ''}`}>
                       <td className="p-3 lg:p-4">
                         <input
                           type="text"
@@ -185,7 +229,22 @@ function App() {
                         />
                       </td>
                       <td className="p-3 lg:p-4 text-center">
-                        <span className="inline-flex items-center px-2 lg:px-4 py-1 lg:py-2 bg-green-100 text-green-800 rounded-full font-bold text-sm lg:text-lg">
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={item.isAlcoholic}
+                            onChange={(e) => handleChange(index, "isAlcoholic", e.target.checked)}
+                            className="sr-only peer"
+                          />
+                          <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+                        </label>
+                      </td>
+                      <td className="p-3 lg:p-4 text-center">
+                        <span className={`inline-flex items-center px-2 lg:px-4 py-1 lg:py-2 rounded-full font-bold text-sm lg:text-lg ${
+                          item.isAlcoholic 
+                            ? 'bg-purple-100 text-purple-800' 
+                            : 'bg-green-100 text-green-800'
+                        }`}>
                           Rs.{(item.unitPrice * item.quantity).toLocaleString()}
                         </span>
                       </td>
@@ -221,19 +280,36 @@ function App() {
               </span>
               Number of People
             </h2>
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 sm:p-6 rounded-2xl border border-purple-200">
-              <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
-                <label className="text-lg sm:text-xl font-semibold text-gray-700 flex items-center space-x-2">
-                  <span>👥</span>
-                  <span>People attending:</span>
-                </label>
-                <input
-                  type="number"
-                  value={people}
-                  onChange={(e) => setPeople(Number(e.target.value))}
-                  className="w-32 sm:w-24 p-3 border-2 border-purple-300 rounded-xl text-center text-xl font-bold focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200"
-                  min="1"
-                />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+              <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 sm:p-6 rounded-2xl border border-purple-200">
+                <div className="flex flex-col items-center space-y-3">
+                  <label className="text-lg sm:text-xl font-semibold text-gray-700 flex items-center space-x-2">
+                    <span>🍺</span>
+                    <span>Alcoholic People:</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={alcoholicPeople}
+                    onChange={(e) => setAlcoholicPeople(Number(e.target.value))}
+                    className="w-32 sm:w-24 p-3 border-2 border-purple-300 rounded-xl text-center text-xl font-bold focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200"
+                    min="0"
+                  />
+                </div>
+              </div>
+              <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 sm:p-6 rounded-2xl border border-green-200">
+                <div className="flex flex-col items-center space-y-3">
+                  <label className="text-lg sm:text-xl font-semibold text-gray-700 flex items-center space-x-2">
+                    <span>🥤</span>
+                    <span>Non-Alcoholic People:</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={nonAlcoholicPeople}
+                    onChange={(e) => setNonAlcoholicPeople(Number(e.target.value))}
+                    className="w-32 sm:w-24 p-3 border-2 border-green-300 rounded-xl text-center text-xl font-bold focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200"
+                    min="0"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -246,23 +322,51 @@ function App() {
               </span>
               Budget Summary
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100">
                 <div className="flex items-center space-x-3 mb-2">
                   <span className="text-2xl sm:text-3xl">💰</span>
                   <span className="text-base sm:text-lg font-semibold text-gray-600">Total Cost</span>
                 </div>
-                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-600">
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-600">
                   Rs.{totalCost.toLocaleString()}
                 </p>
               </div>
               <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100">
                 <div className="flex items-center space-x-3 mb-2">
-                  <span className="text-2xl sm:text-3xl">👤</span>
-                  <span className="text-base sm:text-lg font-semibold text-gray-600">Cost per Person</span>
+                  <span className="text-2xl sm:text-3xl">🍺</span>
+                  <span className="text-base sm:text-lg font-semibold text-gray-600">Alcoholic Cost</span>
                 </div>
-                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-600">
-                  Rs.{parseFloat(perPerson).toLocaleString()}
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-600">
+                  Rs.{totalAlcoholicCost.toLocaleString()}
+                </p>
+                {alcoholicPeople > 0 && (
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                    Per person: Rs.{alcoholicCostPerPerson.toLocaleString()}
+                  </p>
+                )}
+              </div>
+              <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100">
+                <div className="flex items-center space-x-3 mb-2">
+                  <span className="text-2xl sm:text-3xl">🥤</span>
+                  <span className="text-base sm:text-lg font-semibold text-gray-600">Non-Alcoholic Cost</span>
+                </div>
+                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600">
+                  Rs.{totalNonAlcoholicCost.toLocaleString()}
+                </p>
+                {nonAlcoholicPeople > 0 && (
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                    Per person: Rs.{nonAlcoholicCostPerPerson.toLocaleString()}
+                  </p>
+                )}
+              </div>
+              <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100">
+                <div className="flex items-center space-x-3 mb-2">
+                  <span className="text-2xl sm:text-3xl">👥</span>
+                  <span className="text-base sm:text-lg font-semibold text-gray-600">Total People</span>
+                </div>
+                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600">
+                  {totalPeople.toLocaleString()}
                 </p>
               </div>
             </div>
@@ -270,9 +374,13 @@ function App() {
             {/* PDF Generation Component */}
             <PDFGenerator 
               items={items}
-              people={people}
+              alcoholicPeople={alcoholicPeople}
+              nonAlcoholicPeople={nonAlcoholicPeople}
               totalCost={totalCost}
-              perPerson={perPerson}
+              totalAlcoholicCost={totalAlcoholicCost}
+              totalNonAlcoholicCost={totalNonAlcoholicCost}
+              alcoholicCostPerPerson={alcoholicCostPerPerson}
+              nonAlcoholicCostPerPerson={nonAlcoholicCostPerPerson}
             />
           </div>
         </div>
