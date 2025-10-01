@@ -10,7 +10,8 @@ const PDFGenerator = ({
   totalAlcoholicCost, 
   totalNonAlcoholicCost, 
   alcoholicCostPerPerson, 
-  nonAlcoholicCostPerPerson 
+  nonAlcoholicCostPerPerson,
+  darkMode = false
 }) => {
   const totalPeople = alcoholicPeople + nonAlcoholicPeople;
 
@@ -291,7 +292,9 @@ const PDFGenerator = ({
 
   return (
     <div className="mt-6 space-y-4">
-      <h3 className="text-lg font-semibold text-center text-gray-700 mb-4">
+      <h3 className={`text-lg font-semibold text-center mb-4 ${
+        darkMode ? 'text-white' : 'text-gray-700'
+      }`}>
         📊 Export Your Budget Report
       </h3>
       
@@ -322,7 +325,9 @@ const PDFGenerator = ({
       </div>
 
       <div className="text-center">
-        <p className="text-sm text-gray-500 max-w-md mx-auto">
+        <p className={`text-sm max-w-md mx-auto ${
+          darkMode ? 'text-gray-300' : 'text-gray-500'
+        }`}>
           Choose your preferred format: PDF for documents or JPG for easy sharing on social media
         </p>
       </div>

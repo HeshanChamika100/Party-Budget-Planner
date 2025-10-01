@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Footer from "./components/Footer";
 import PDFGenerator from './components/PDFGenerator';
 
@@ -12,6 +12,11 @@ function App() {
 
   const [alcoholicPeople, setAlcoholicPeople] = useState(9);
   const [nonAlcoholicPeople, setNonAlcoholicPeople] = useState(4);
+  const [darkMode, setDarkMode] = useState(() => {
+    // Check if dark mode was previously saved
+    const saved = localStorage.getItem('darkMode');
+    return saved ? JSON.parse(saved) : false;
+  });
 
   const handleChange = (index, field, value) => {
     const newItems = [...items];
@@ -53,11 +58,47 @@ function App() {
     ? (totalNonAlcoholicCost / totalPeople) + (totalAlcoholicCost / alcoholicPeople)
     : nonAlcoholicCostPerPerson;
 
+  // Dark mode functionality
+  useEffect(() => {
+    // Save dark mode preference to localStorage
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
+    
+    // Apply dark mode to document
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 p-2 sm:p-4">
+    <div className={`min-h-screen transition-all duration-300 p-2 sm:p-4 ${
+      darkMode 
+        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-black' 
+        : 'bg-gradient-to-br from-purple-400 via-pink-500 to-red-500'
+    }`}>
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
-        <div className="text-center mb-6 sm:mb-10">
+        <div className="text-center mb-6 sm:mb-10 relative">
+          {/* Dark Mode Toggle */}
+          <button
+            onClick={toggleDarkMode}
+            className={`absolute top-0 right-0 p-3 rounded-full shadow-lg transform hover:scale-110 transition-all duration-200 ${
+              darkMode 
+                ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-300' 
+                : 'bg-gray-800 text-yellow-400 hover:bg-gray-700'
+            }`}
+            title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            <span className="text-xl">
+              {darkMode ? '☀️' : '🌙'}
+            </span>
+          </button>
+          
           <div className="flex items-center justify-center mb-4 sm:mb-6">
             {/* Custom Logo */}
             <div className="relative mr-4">
@@ -85,10 +126,16 @@ function App() {
         </div>
 
         {/* Main Container */}
-        <div className="bg-white/95 backdrop-blur-sm shadow-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 border border-white/20">
+        <div className={`backdrop-blur-sm shadow-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 transition-all duration-300 ${
+          darkMode 
+            ? 'bg-gray-800/95 border border-gray-600/20 text-white' 
+            : 'bg-white/95 border border-white/20 text-gray-800'
+        }`}>
           {/* Items Section */}
           <div className="mb-6 sm:mb-10">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-4 sm:mb-6 lg:mb-8 flex items-center">
+            <h2 className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 lg:mb-8 flex items-center ${
+              darkMode ? 'text-white' : 'text-gray-800'
+            }`}>
               <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-sm sm:text-lg mr-3 sm:mr-4 shadow-lg">
                 1
               </span>
@@ -98,9 +145,15 @@ function App() {
             {/* Mobile Cards - Show on small screens */}
             <div className="block md:hidden space-y-4">
               {items.map((item, index) => (
-                <div key={index} className="bg-white border-2 border-gray-200 rounded-2xl p-4 shadow-lg">
+                <div key={index} className={`border-2 rounded-2xl p-4 shadow-lg transition-all duration-300 ${
+                  darkMode 
+                    ? 'bg-gray-700 border-gray-600' 
+                    : 'bg-white border-gray-200'
+                }`}>
                   <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                    <h3 className={`text-lg font-semibold flex items-center ${
+                      darkMode ? 'text-white' : 'text-gray-800'
+                    }`}>
                       <span className="text-xl mr-2">🛍️</span>
                       Item #{index + 1}
                     </h3>
@@ -115,35 +168,53 @@ function App() {
                   
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-2">Item Name</label>
+                      <label className={`block text-sm font-medium mb-2 ${
+                        darkMode ? 'text-gray-300' : 'text-gray-600'
+                      }`}>Item Name</label>
                       <input
                         type="text"
                         value={item.name}
                         onChange={(e) => handleChange(index, "name", e.target.value)}
-                        className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 font-medium"
+                        className={`w-full p-3 border-2 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 font-medium ${
+                          darkMode 
+                            ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
+                            : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500'
+                        }`}
                         placeholder="Enter item name..."
                       />
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-600 mb-2">💰 Unit Price</label>
+                        <label className={`block text-sm font-medium mb-2 ${
+                          darkMode ? 'text-gray-300' : 'text-gray-600'
+                        }`}>💰 Unit Price</label>
                         <input
                           type="number"
                           value={item.unitPrice}
                           onChange={(e) => handleChange(index, "unitPrice", e.target.value)}
-                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 text-center font-medium"
+                          className={`w-full p-3 border-2 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 text-center font-medium ${
+                            darkMode 
+                              ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
+                              : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500'
+                          }`}
                           placeholder="0"
                         />
                       </div>
                       
                       <div>
-                        <label className="block text-sm font-medium text-gray-600 mb-2">📦 Quantity</label>
+                        <label className={`block text-sm font-medium mb-2 ${
+                          darkMode ? 'text-gray-300' : 'text-gray-600'
+                        }`}>📦 Quantity</label>
                         <input
                           type="number"
                           value={item.quantity}
                           onChange={(e) => handleChange(index, "quantity", e.target.value)}
-                          className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 text-center font-medium"
+                          className={`w-full p-3 border-2 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 text-center font-medium ${
+                            darkMode 
+                              ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
+                              : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500'
+                          }`}
                           min="1"
                         />
                       </div>
@@ -186,7 +257,9 @@ function App() {
             </div>
 
             {/* Desktop Table - Show on medium screens and up */}
-            <div className="hidden md:block overflow-x-auto rounded-2xl shadow-lg border border-gray-200">
+            <div className={`hidden md:block overflow-x-auto rounded-2xl shadow-lg border transition-all duration-300 ${
+              darkMode ? 'border-gray-600' : 'border-gray-200'
+            }`}>
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
                   <tr>
@@ -198,15 +271,25 @@ function App() {
                     <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">⚡ Action</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white">
+                <tbody className={`transition-all duration-300 ${
+                  darkMode ? 'bg-gray-700' : 'bg-white'
+                }`}>
                   {items.map((item, index) => (
-                    <tr key={index} className={`border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200 ${item.isAlcoholic ? 'bg-purple-50/30' : ''}`}>
+                    <tr key={index} className={`border-b transition-colors duration-200 ${
+                      darkMode 
+                        ? `border-gray-600 hover:bg-gray-600 ${item.isAlcoholic ? 'bg-gray-600/50' : ''}` 
+                        : `border-gray-100 hover:bg-gray-50 ${item.isAlcoholic ? 'bg-purple-50/30' : ''}`
+                    }`}>
                       <td className="p-3 lg:p-4">
                         <input
                           type="text"
                           value={item.name}
                           onChange={(e) => handleChange(index, "name", e.target.value)}
-                          className="w-full p-2 lg:p-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 font-medium text-sm lg:text-base"
+                          className={`w-full p-2 lg:p-3 border-2 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 font-medium text-sm lg:text-base ${
+                            darkMode 
+                              ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
+                              : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500'
+                          }`}
                           placeholder="Enter item name..."
                         />
                       </td>
@@ -215,7 +298,11 @@ function App() {
                           type="number"
                           value={item.unitPrice}
                           onChange={(e) => handleChange(index, "unitPrice", e.target.value)}
-                          className="w-full p-2 lg:p-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 text-center font-medium text-sm lg:text-base"
+                          className={`w-full p-2 lg:p-3 border-2 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 text-center font-medium text-sm lg:text-base ${
+                            darkMode 
+                              ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
+                              : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500'
+                          }`}
                           placeholder="0"
                         />
                       </td>
@@ -224,7 +311,11 @@ function App() {
                           type="number"
                           value={item.quantity}
                           onChange={(e) => handleChange(index, "quantity", e.target.value)}
-                          className="w-full p-2 lg:p-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 text-center font-medium text-sm lg:text-base"
+                          className={`w-full p-2 lg:p-3 border-2 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 text-center font-medium text-sm lg:text-base ${
+                            darkMode 
+                              ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
+                              : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500'
+                          }`}
                           min="1"
                         />
                       </td>
@@ -274,16 +365,24 @@ function App() {
 
           {/* People Section */}
           <div className="mb-6 sm:mb-10">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center">
+            <h2 className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 flex items-center ${
+              darkMode ? 'text-white' : 'text-gray-800'
+            }`}>
               <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-sm sm:text-lg mr-3 sm:mr-4 shadow-lg">
                 2
               </span>
               Number of People
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 sm:p-6 rounded-2xl border border-purple-200">
+              <div className={`p-4 sm:p-6 rounded-2xl border transition-all duration-300 ${
+                darkMode 
+                  ? 'bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-400/30' 
+                  : 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200'
+              }`}>
                 <div className="flex flex-col items-center space-y-3">
-                  <label className="text-lg sm:text-xl font-semibold text-gray-700 flex items-center space-x-2">
+                  <label className={`text-lg sm:text-xl font-semibold flex items-center space-x-2 ${
+                    darkMode ? 'text-gray-200' : 'text-gray-700'
+                  }`}>
                     <span>🍺</span>
                     <span>Alcoholic People:</span>
                   </label>
@@ -291,14 +390,24 @@ function App() {
                     type="number"
                     value={alcoholicPeople}
                     onChange={(e) => setAlcoholicPeople(Number(e.target.value))}
-                    className="w-32 sm:w-24 p-3 border-2 border-purple-300 rounded-xl text-center text-xl font-bold focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200"
+                    className={`w-32 sm:w-24 p-3 border-2 rounded-xl text-center text-xl font-bold focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 ${
+                      darkMode 
+                        ? 'bg-gray-600 border-purple-400 text-white' 
+                        : 'bg-white border-purple-300 text-gray-800'
+                    }`}
                     min="0"
                   />
                 </div>
               </div>
-              <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 sm:p-6 rounded-2xl border border-green-200">
+              <div className={`p-4 sm:p-6 rounded-2xl border transition-all duration-300 ${
+                darkMode 
+                  ? 'bg-gradient-to-r from-green-900/30 to-blue-900/30 border-green-400/30' 
+                  : 'bg-gradient-to-r from-green-50 to-blue-50 border-green-200'
+              }`}>
                 <div className="flex flex-col items-center space-y-3">
-                  <label className="text-lg sm:text-xl font-semibold text-gray-700 flex items-center space-x-2">
+                  <label className={`text-lg sm:text-xl font-semibold flex items-center space-x-2 ${
+                    darkMode ? 'text-gray-200' : 'text-gray-700'
+                  }`}>
                     <span>🥤</span>
                     <span>Non-Alcoholic People:</span>
                   </label>
@@ -306,7 +415,11 @@ function App() {
                     type="number"
                     value={nonAlcoholicPeople}
                     onChange={(e) => setNonAlcoholicPeople(Number(e.target.value))}
-                    className="w-32 sm:w-24 p-3 border-2 border-green-300 rounded-xl text-center text-xl font-bold focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200"
+                    className={`w-32 sm:w-24 p-3 border-2 rounded-xl text-center text-xl font-bold focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 ${
+                      darkMode 
+                        ? 'bg-gray-600 border-green-400 text-white' 
+                        : 'bg-white border-green-300 text-gray-800'
+                    }`}
                     min="0"
                   />
                 </div>
@@ -315,55 +428,89 @@ function App() {
           </div>
 
           {/* Summary Section */}
-          <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 sm:p-6 lg:p-8 rounded-2xl border border-green-200">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center">
+          <div className={`p-4 sm:p-6 lg:p-8 rounded-2xl border transition-all duration-300 ${
+            darkMode 
+              ? 'bg-gradient-to-r from-green-900/30 to-blue-900/30 border-green-400/30' 
+              : 'bg-gradient-to-r from-green-50 to-blue-50 border-green-200'
+          }`}>
+            <h2 className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 flex items-center ${
+              darkMode ? 'text-white' : 'text-gray-800'
+            }`}>
               <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-sm sm:text-lg mr-3 sm:mr-4 shadow-lg">
                 3
               </span>
               Budget Summary
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100">
+              <div className={`p-4 sm:p-6 rounded-2xl shadow-lg border transition-all duration-300 ${
+                darkMode 
+                  ? 'bg-gray-700 border-gray-600' 
+                  : 'bg-white border-gray-100'
+              }`}>
                 <div className="flex items-center space-x-3 mb-2">
                   <span className="text-2xl sm:text-3xl">💰</span>
-                  <span className="text-base sm:text-lg font-semibold text-gray-600">Total Cost</span>
+                  <span className={`text-base sm:text-lg font-semibold ${
+                    darkMode ? 'text-gray-300' : 'text-gray-600'
+                  }`}>Total Cost</span>
                 </div>
                 <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-600">
                   Rs.{totalCost.toLocaleString()}
                 </p>
               </div>
-              <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100">
+              <div className={`p-4 sm:p-6 rounded-2xl shadow-lg border transition-all duration-300 ${
+                darkMode 
+                  ? 'bg-gray-700 border-gray-600' 
+                  : 'bg-white border-gray-100'
+              }`}>
                 <div className="flex items-center space-x-3 mb-2">
                   <span className="text-2xl sm:text-3xl">🍺</span>
-                  <span className="text-base sm:text-lg font-semibold text-gray-600">Alcoholic Cost</span>
+                  <span className={`text-base sm:text-lg font-semibold ${
+                    darkMode ? 'text-gray-300' : 'text-gray-600'
+                  }`}>Alcoholic Cost</span>
                 </div>
                 <p className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-600">
                   Rs.{totalAlcoholicCost.toLocaleString()}
                 </p>
                 {alcoholicPeople > 0 && (
-                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                  <p className={`text-xs sm:text-sm mt-1 ${
+                    darkMode ? 'text-gray-400' : 'text-gray-500'
+                  }`}>
                     Per person: Rs.{alcoholicCostPerPerson.toLocaleString()}
                   </p>
                 )}
               </div>
-              <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100">
+              <div className={`p-4 sm:p-6 rounded-2xl shadow-lg border transition-all duration-300 ${
+                darkMode 
+                  ? 'bg-gray-700 border-gray-600' 
+                  : 'bg-white border-gray-100'
+              }`}>
                 <div className="flex items-center space-x-3 mb-2">
                   <span className="text-2xl sm:text-3xl">🥤</span>
-                  <span className="text-base sm:text-lg font-semibold text-gray-600">Non-Alcoholic Cost</span>
+                  <span className={`text-base sm:text-lg font-semibold ${
+                    darkMode ? 'text-gray-300' : 'text-gray-600'
+                  }`}>Non-Alcoholic Cost</span>
                 </div>
                 <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600">
                   Rs.{totalNonAlcoholicCost.toLocaleString()}
                 </p>
                 {nonAlcoholicPeople > 0 && (
-                  <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                  <p className={`text-xs sm:text-sm mt-1 ${
+                    darkMode ? 'text-gray-400' : 'text-gray-500'
+                  }`}>
                     Per person: Rs.{nonAlcoholicCostPerPerson.toLocaleString()}
                   </p>
                 )}
               </div>
-              <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100">
+              <div className={`p-4 sm:p-6 rounded-2xl shadow-lg border transition-all duration-300 ${
+                darkMode 
+                  ? 'bg-gray-700 border-gray-600' 
+                  : 'bg-white border-gray-100'
+              }`}>
                 <div className="flex items-center space-x-3 mb-2">
                   <span className="text-2xl sm:text-3xl">👥</span>
-                  <span className="text-base sm:text-lg font-semibold text-gray-600">Total People</span>
+                  <span className={`text-base sm:text-lg font-semibold ${
+                    darkMode ? 'text-gray-300' : 'text-gray-600'
+                  }`}>Total People</span>
                 </div>
                 <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600">
                   {totalPeople.toLocaleString()}
@@ -381,12 +528,13 @@ function App() {
               totalNonAlcoholicCost={totalNonAlcoholicCost}
               alcoholicCostPerPerson={alcoholicCostPerPerson}
               nonAlcoholicCostPerPerson={nonAlcoholicCostPerPerson}
+              darkMode={darkMode}
             />
           </div>
         </div>
 
         {/* Footer */}
-        <Footer />
+        <Footer darkMode={darkMode} />
       </div>
     </div>
   );

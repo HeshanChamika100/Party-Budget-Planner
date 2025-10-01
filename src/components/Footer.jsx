@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 
-const Footer = () => {
+const Footer = ({ darkMode = false }) => {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [partyEmojis] = useState(['🎉', '🎊', '🎈', '🎂', '🥳', '🎁', '🎭', '🎪', '🎨', '🎵', '💃', '🕺'])
   const [currentEmojiIndex, setCurrentEmojiIndex] = useState(0)
@@ -57,7 +57,11 @@ const Footer = () => {
       </div>
 
       {/* Party Tips Section */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 mb-6 border border-white/20">
+      <div className={`backdrop-blur-sm rounded-2xl p-4 sm:p-6 mb-6 border transition-all duration-300 ${
+        darkMode 
+          ? 'bg-gray-800/80 border-gray-600/30' 
+          : 'bg-white/10 border-white/20'
+      }`}>
         <div className="text-center">
           <h3 className="text-lg sm:text-xl font-bold text-white mb-3 flex items-center justify-center">
             <span className="mr-2 text-2xl animate-pulse">💡</span>
