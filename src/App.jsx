@@ -541,87 +541,99 @@ function App() {
               Budget Summary
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-              <div className={`p-4 sm:p-6 rounded-2xl shadow-lg border transition-all duration-300 ${
+              <div className={`p-3 sm:p-6 rounded-2xl shadow-lg border transition-all duration-300 ${
                 darkMode 
                   ? 'bg-gray-700 border-gray-600' 
                   : 'bg-white border-gray-100'
               }`}>
-                <div className="flex items-center space-x-3 mb-2">
-                  <span className="text-2xl sm:text-3xl">💰</span>
-                  <span className={`text-base sm:text-lg font-semibold ${
-                    darkMode ? 'text-gray-300' : 'text-gray-600'
-                  }`}>Total Cost</span>
-                </div>
-                <p className={`text-xl sm:text-2xl lg:text-3xl font-bold ${
-                  darkMode ? 'text-purple-400' : 'text-purple-600'
-                }`}>
-                  Rs.{totalCost.toLocaleString()}
-                </p>
-              </div>
-              <div className={`p-4 sm:p-6 rounded-2xl shadow-lg border transition-all duration-300 ${
-                darkMode 
-                  ? 'bg-gray-700 border-gray-600' 
-                  : 'bg-white border-gray-100'
-              }`}>
-                <div className="flex items-center space-x-3 mb-2">
-                  <span className="text-2xl sm:text-3xl">🍺</span>
-                  <span className={`text-base sm:text-lg font-semibold ${
-                    darkMode ? 'text-gray-300' : 'text-gray-600'
-                  }`}>Alcoholic Cost</span>
-                </div>
-                <p className={`text-lg sm:text-xl lg:text-2xl font-bold ${
-                  darkMode ? 'text-purple-400' : 'text-purple-600'
-                }`}>
-                  Rs.{totalAlcoholicCost.toLocaleString()}
-                </p>
-                {alcoholicPeople > 0 && (
-                  <p className={`text-xs sm:text-sm mt-1 ${
-                    darkMode ? 'text-gray-400' : 'text-gray-500'
+                <div className="flex items-center justify-between sm:flex-col sm:items-center sm:space-y-2">
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <span className="text-xl sm:text-2xl lg:text-3xl">💰</span>
+                    <span className={`text-sm sm:text-base lg:text-lg font-semibold ${
+                      darkMode ? 'text-gray-300' : 'text-gray-600'
+                    }`}>Total Cost</span>
+                  </div>
+                  <p className={`text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold ${
+                    darkMode ? 'text-purple-400' : 'text-purple-600'
                   }`}>
-                    Per person: Rs.{alcoholicCostPerPerson.toLocaleString()}
+                    Rs.{totalCost.toLocaleString()}
                   </p>
-                )}
+                </div>
               </div>
-              <div className={`p-4 sm:p-6 rounded-2xl shadow-lg border transition-all duration-300 ${
+              <div className={`p-3 sm:p-6 rounded-2xl shadow-lg border transition-all duration-300 ${
                 darkMode 
                   ? 'bg-gray-700 border-gray-600' 
                   : 'bg-white border-gray-100'
               }`}>
-                <div className="flex items-center space-x-3 mb-2">
-                  <span className="text-2xl sm:text-3xl">🥤</span>
-                  <span className={`text-base sm:text-lg font-semibold ${
-                    darkMode ? 'text-gray-300' : 'text-gray-600'
-                  }`}>Non-Alcoholic Cost</span>
+                <div className="flex items-start justify-between sm:flex-col sm:items-center sm:space-y-2">
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <span className="text-xl sm:text-2xl lg:text-3xl">🍺</span>
+                    <span className={`text-sm sm:text-base lg:text-lg font-semibold ${
+                      darkMode ? 'text-gray-300' : 'text-gray-600'
+                    }`}>Alcoholic Cost</span>
+                  </div>
+                  <div className="text-right sm:text-center">
+                    <p className={`text-lg sm:text-xl lg:text-2xl font-bold ${
+                      darkMode ? 'text-purple-400' : 'text-purple-600'
+                    }`}>
+                      Rs.{totalAlcoholicCost.toLocaleString()}
+                    </p>
+                    {alcoholicPeople > 0 && (
+                      <p className={`text-xs sm:text-sm mt-1 ${
+                        darkMode ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        Per person: Rs.{alcoholicCostPerPerson.toLocaleString()}
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <p className={`text-lg sm:text-xl lg:text-2xl font-bold ${
-                  darkMode ? 'text-green-400' : 'text-green-600'
-                }`}>
-                  Rs.{totalNonAlcoholicCost.toLocaleString()}
-                </p>
-                {nonAlcoholicPeople > 0 && (
-                  <p className={`text-xs sm:text-sm mt-1 ${
-                    darkMode ? 'text-gray-400' : 'text-gray-500'
+              </div>
+              <div className={`p-3 sm:p-6 rounded-2xl shadow-lg border transition-all duration-300 ${
+                darkMode 
+                  ? 'bg-gray-700 border-gray-600' 
+                  : 'bg-white border-gray-100'
+              }`}>
+                <div className="flex items-start justify-between sm:flex-col sm:items-center sm:space-y-2">
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <span className="text-xl sm:text-2xl lg:text-3xl">🥤</span>
+                    <span className={`text-sm sm:text-base lg:text-lg font-semibold ${
+                      darkMode ? 'text-gray-300' : 'text-gray-600'
+                    }`}>Non-Alcoholic Cost</span>
+                  </div>
+                  <div className="text-right sm:text-center">
+                    <p className={`text-lg sm:text-xl lg:text-2xl font-bold ${
+                      darkMode ? 'text-green-400' : 'text-green-600'
+                    }`}>
+                      Rs.{totalNonAlcoholicCost.toLocaleString()}
+                    </p>
+                    {nonAlcoholicPeople > 0 && (
+                      <p className={`text-xs sm:text-sm mt-1 ${
+                        darkMode ? 'text-gray-400' : 'text-gray-500'
+                      }`}>
+                        Per person: Rs.{nonAlcoholicCostPerPerson.toLocaleString()}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className={`p-3 sm:p-6 rounded-2xl shadow-lg border transition-all duration-300 ${
+                darkMode 
+                  ? 'bg-gray-700 border-gray-600' 
+                  : 'bg-white border-gray-100'
+              }`}>
+                <div className="flex items-center justify-between sm:flex-col sm:items-center sm:space-y-2">
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <span className="text-xl sm:text-2xl lg:text-3xl">👥</span>
+                    <span className={`text-sm sm:text-base lg:text-lg font-semibold ${
+                      darkMode ? 'text-gray-300' : 'text-gray-600'
+                    }`}>Total People</span>
+                  </div>
+                  <p className={`text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold ${
+                    darkMode ? 'text-blue-400' : 'text-blue-600'
                   }`}>
-                    Per person: Rs.{nonAlcoholicCostPerPerson.toLocaleString()}
+                    {totalPeople.toLocaleString()}
                   </p>
-                )}
-              </div>
-              <div className={`p-4 sm:p-6 rounded-2xl shadow-lg border transition-all duration-300 ${
-                darkMode 
-                  ? 'bg-gray-700 border-gray-600' 
-                  : 'bg-white border-gray-100'
-              }`}>
-                <div className="flex items-center space-x-3 mb-2">
-                  <span className="text-2xl sm:text-3xl">👥</span>
-                  <span className={`text-base sm:text-lg font-semibold ${
-                    darkMode ? 'text-gray-300' : 'text-gray-600'
-                  }`}>Total People</span>
                 </div>
-                <p className={`text-xl sm:text-2xl lg:text-3xl font-bold ${
-                  darkMode ? 'text-blue-400' : 'text-blue-600'
-                }`}>
-                  {totalPeople.toLocaleString()}
-                </p>
               </div>
             </div>
 
