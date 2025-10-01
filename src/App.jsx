@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Footer from "./components/Footer";
+import PDFGenerator from "./components/PDFGenerator";
 
 function App() {
   const [items, setItems] = useState([
@@ -265,6 +266,14 @@ function App() {
                 </p>
               </div>
             </div>
+
+            {/* PDF Generation Component */}
+            <PDFGenerator 
+              items={items}
+              people={people}
+              totalCost={totalCost}
+              perPerson={perPerson}
+            />
           </div>
         </div>
 
