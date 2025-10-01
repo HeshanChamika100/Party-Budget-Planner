@@ -99,25 +99,25 @@ function App() {
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-6 sm:mb-10 relative">
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Button - Only visible on mobile */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className={`mobile-menu-container absolute top-0 right-0 p-3 rounded-full shadow-lg transform hover:scale-110 transition-all duration-200 sm:hidden ${
+            className={`mobile-menu-container absolute -top-10 right-2 p-2 rounded-full shadow-lg transform hover:scale-110 transition-all duration-200 block sm:hidden z-10 ${
               darkMode 
                 ? 'bg-gray-700 text-white hover:bg-gray-600' 
                 : 'bg-white text-gray-800 hover:bg-gray-100'
             }`}
             title="Menu"
           >
-            <span className="text-xl">
+            <span className="text-lg">
               {isMobileMenuOpen ? '✕' : '☰'}
             </span>
           </button>
 
-          {/* Desktop Dark Mode Toggle */}
+          {/* Desktop Dark Mode Toggle - Only visible on desktop */}
           <button
             onClick={toggleDarkMode}
-            className={`absolute top-0 right-0 p-3 rounded-full shadow-lg transform hover:scale-110 transition-all duration-200 hidden sm:block ${
+            className={`absolute top-0 right-0 p-3 rounded-full shadow-lg transform hover:scale-110 transition-all duration-200 hidden sm:block z-10 ${
               darkMode 
                 ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-300' 
                 : 'bg-gray-800 text-yellow-400 hover:bg-gray-700'
@@ -198,13 +198,13 @@ function App() {
             </div>
           )}
           
-          <div className="flex items-center justify-center mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row items-center justify-center mb-4 sm:mb-6 mt-12 sm:mt-0 px-4 sm:px-0 space-y-4 sm:space-y-0 sm:space-x-6">
             {/* Custom Logo */}
-            <div className="relative mr-4">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-yellow-400 via-pink-500 to-purple-600 rounded-2xl shadow-2xl flex items-center justify-center transform rotate-12 hover:rotate-0 transition-transform duration-300">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-18 lg:h-18 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+            <div className="relative">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-gradient-to-br from-yellow-400 via-pink-500 to-purple-600 rounded-2xl shadow-2xl flex items-center justify-center transform rotate-12 hover:rotate-0 transition-transform duration-300">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-22 lg:h-22 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
                   <div className="relative">
-                    <span className="text-2xl sm:text-3xl lg:text-4xl animate-bounce">🎉</span>
+                    <span className="text-3xl sm:text-4xl lg:text-5xl animate-bounce">🎉</span>
                     <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
                   </div>
                 </div>
@@ -215,7 +215,7 @@ function App() {
               <div className="absolute top-1 -right-4 w-2 h-2 bg-purple-300 rounded-full animate-pulse opacity-80"></div>
             </div>
             
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white drop-shadow-2xl animate-pulse">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white drop-shadow-2xl animate-pulse text-center sm:text-left">
               Party Budget Planner
             </h1>
           </div>
