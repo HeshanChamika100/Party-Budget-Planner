@@ -17,6 +17,7 @@ function App() {
     const saved = localStorage.getItem('darkMode');
     return saved ? JSON.parse(saved) : false;
   });
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleChange = (index, field, value) => {
     const newItems = [...items];
@@ -71,6 +72,20 @@ function App() {
     }
   }, [darkMode]);
 
+  // Close mobile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (isMobileMenuOpen && !event.target.closest('.mobile-menu-container')) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMobileMenuOpen]);
+
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
@@ -84,10 +99,25 @@ function App() {
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-6 sm:mb-10 relative">
-          {/* Dark Mode Toggle */}
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className={`mobile-menu-container absolute top-0 right-0 p-3 rounded-full shadow-lg transform hover:scale-110 transition-all duration-200 sm:hidden ${
+              darkMode 
+                ? 'bg-gray-700 text-white hover:bg-gray-600' 
+                : 'bg-white text-gray-800 hover:bg-gray-100'
+            }`}
+            title="Menu"
+          >
+            <span className="text-xl">
+              {isMobileMenuOpen ? '✕' : '☰'}
+            </span>
+          </button>
+
+          {/* Desktop Dark Mode Toggle */}
           <button
             onClick={toggleDarkMode}
-            className={`absolute top-0 right-0 p-3 rounded-full shadow-lg transform hover:scale-110 transition-all duration-200 ${
+            className={`absolute top-0 right-0 p-3 rounded-full shadow-lg transform hover:scale-110 transition-all duration-200 hidden sm:block ${
               darkMode 
                 ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-300' 
                 : 'bg-gray-800 text-yellow-400 hover:bg-gray-700'
@@ -98,6 +128,75 @@ function App() {
               {darkMode ? '☀️' : '🌙'}
             </span>
           </button>
+
+          {/* Mobile Menu Overlay */}
+          {isMobileMenuOpen && (
+            <div className={`mobile-menu-container fixed top-0 right-0 w-80 h-screen z-50 shadow-2xl sm:hidden transform transition-all duration-300 ease-in-out animate-slide-in-right ${
+              darkMode 
+                ? 'bg-gray-900/95 backdrop-blur-sm' 
+                : 'bg-white/95 backdrop-blur-sm'
+            }`}>
+              <div className="flex flex-col h-full">
+                {/* Menu Header */}
+                <div className={`p-6 border-b ${
+                  darkMode ? 'border-gray-700' : 'border-gray-200'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <h3 className={`text-xl font-bold ${
+                      darkMode ? 'text-white' : 'text-gray-800'
+                    }`}>
+                      Menu
+                    </h3>
+                    <button
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`p-2 rounded-full transition-all duration-200 ${
+                        darkMode 
+                          ? 'text-gray-400 hover:text-white hover:bg-gray-800' 
+                          : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                      }`}
+                    >
+                      <span className="text-xl">✕</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Menu Content */}
+                <div className="flex-1 p-6">
+                  <div className="space-y-4">
+                    <button
+                      onClick={() => {
+                        toggleDarkMode();
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center space-x-3 p-4 rounded-xl transition-all duration-200 ${
+                        darkMode 
+                          ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-300' 
+                          : 'bg-gray-800 text-yellow-400 hover:bg-gray-700'
+                      }`}
+                    >
+                      <span className="text-xl">
+                        {darkMode ? '☀️' : '🌙'}
+                      </span>
+                      <span className="font-medium">
+                        {darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Menu Footer */}
+                <div className={`p-6 border-t ${
+                  darkMode ? 'border-gray-700' : 'border-gray-200'
+                }`}>
+                  <p className={`text-sm text-center ${
+                    darkMode ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    Party Budget Planner
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           
           <div className="flex items-center justify-center mb-4 sm:mb-6">
             {/* Custom Logo */}
@@ -453,7 +552,9 @@ function App() {
                     darkMode ? 'text-gray-300' : 'text-gray-600'
                   }`}>Total Cost</span>
                 </div>
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-purple-600">
+                <p className={`text-xl sm:text-2xl lg:text-3xl font-bold ${
+                  darkMode ? 'text-purple-400' : 'text-purple-600'
+                }`}>
                   Rs.{totalCost.toLocaleString()}
                 </p>
               </div>
@@ -468,7 +569,9 @@ function App() {
                     darkMode ? 'text-gray-300' : 'text-gray-600'
                   }`}>Alcoholic Cost</span>
                 </div>
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-600">
+                <p className={`text-lg sm:text-xl lg:text-2xl font-bold ${
+                  darkMode ? 'text-purple-400' : 'text-purple-600'
+                }`}>
                   Rs.{totalAlcoholicCost.toLocaleString()}
                 </p>
                 {alcoholicPeople > 0 && (
@@ -490,7 +593,9 @@ function App() {
                     darkMode ? 'text-gray-300' : 'text-gray-600'
                   }`}>Non-Alcoholic Cost</span>
                 </div>
-                <p className="text-lg sm:text-xl lg:text-2xl font-bold text-green-600">
+                <p className={`text-lg sm:text-xl lg:text-2xl font-bold ${
+                  darkMode ? 'text-green-400' : 'text-green-600'
+                }`}>
                   Rs.{totalNonAlcoholicCost.toLocaleString()}
                 </p>
                 {nonAlcoholicPeople > 0 && (
@@ -512,7 +617,9 @@ function App() {
                     darkMode ? 'text-gray-300' : 'text-gray-600'
                   }`}>Total People</span>
                 </div>
-                <p className="text-xl sm:text-2xl lg:text-3xl font-bold text-blue-600">
+                <p className={`text-xl sm:text-2xl lg:text-3xl font-bold ${
+                  darkMode ? 'text-blue-400' : 'text-blue-600'
+                }`}>
                   {totalPeople.toLocaleString()}
                 </p>
               </div>
