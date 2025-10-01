@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Footer from "./components/Footer";
 
 function App() {
   const [items, setItems] = useState([
@@ -36,9 +37,27 @@ function App() {
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
         <div className="text-center mb-6 sm:mb-10">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-3 sm:mb-4 drop-shadow-2xl animate-pulse px-2">
-            🎉 Party Budget Planner
-          </h1>
+          <div className="flex items-center justify-center mb-4 sm:mb-6">
+            {/* Custom Logo */}
+            <div className="relative mr-4">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-yellow-400 via-pink-500 to-purple-600 rounded-2xl shadow-2xl flex items-center justify-center transform rotate-12 hover:rotate-0 transition-transform duration-300">
+                <div className="w-12 h-12 sm:w-16 sm:h-16 lg:w-18 lg:h-18 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                  <div className="relative">
+                    <span className="text-2xl sm:text-3xl lg:text-4xl animate-bounce">🎉</span>
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
+                  </div>
+                </div>
+              </div>
+              {/* Logo sparkles */}
+              <div className="absolute -top-2 -left-2 w-4 h-4 bg-yellow-300 rounded-full animate-pulse opacity-70"></div>
+              <div className="absolute -bottom-1 -right-3 w-3 h-3 bg-pink-300 rounded-full animate-pulse opacity-60"></div>
+              <div className="absolute top-1 -right-4 w-2 h-2 bg-purple-300 rounded-full animate-pulse opacity-80"></div>
+            </div>
+            
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white drop-shadow-2xl animate-pulse">
+              Party Budget Planner
+            </h1>
+          </div>
           <p className="text-white/90 text-base sm:text-lg lg:text-xl font-medium drop-shadow-lg px-4">
             Plan your perfect party within budget!
           </p>
@@ -250,11 +269,7 @@ function App() {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-6 sm:mt-8 px-4">
-          <p className="text-white/80 text-base sm:text-lg">
-            🎊 Happy Planning! Make your party memorable! 🎊
-          </p>
-        </div>
+        <Footer />
       </div>
     </div>
   );
