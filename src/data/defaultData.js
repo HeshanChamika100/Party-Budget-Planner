@@ -23,7 +23,7 @@ export const defaultPeople = [
   { name: "Venusha", isAlcoholic: true },
   { name: "Nadil", isAlcoholic: true },
   { name: "Manuka", isAlcoholic: true },
-  { name: "දතා", isAlcoholic: true },
+  { name: "Datha", isAlcoholic: true },
   { name: "Susira", isAlcoholic: true },
   { name: "Sanjula", isAlcoholic: true },
   { name: "Oshan", isAlcoholic: true },

@@ -4,6 +4,7 @@ import html2canvas from 'html2canvas';
 
 const PDFGenerator = ({ 
   items, 
+  people = [],
   alcoholicPeople, 
   nonAlcoholicPeople, 
   totalCost, 
@@ -98,6 +99,48 @@ const PDFGenerator = ({
               </div>
             `;
           }).join('')}
+        </div>
+      </div>
+
+      <div style="margin-bottom: 30px;">
+        <h2 style="color: #333; font-size: 20px; margin-bottom: 20px; border-left: 4px solid #7c3aed; padding-left: 15px;">
+          👥 PARTY PEOPLE
+        </h2>
+        <div style="background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+            ${(() => {
+              const alcoholicPeopleList = people.filter(person => person.isAlcoholic);
+              const nonAlcoholicPeopleList = people.filter(person => !person.isAlcoholic);
+              
+              let leftColumn = '';
+              let rightColumn = '';
+              
+              if (alcoholicPeopleList.length > 0) {
+                leftColumn = `
+                  <div>
+                    <div style="color: #7c3aed; font-weight: bold; font-size: 14px; margin-bottom: 8px;">🍺 Alcoholic People:</div>
+                    <div style="color: #333; font-size: 13px; line-height: 1.5;">${alcoholicPeopleList.map(person => person.name || 'Unnamed').join(', ')}</div>
+                  </div>
+                `;
+              } else {
+                leftColumn = '<div style="color: #666; font-style: italic;">No alcoholic people</div>';
+              }
+              
+              if (nonAlcoholicPeopleList.length > 0) {
+                rightColumn = `
+                  <div>
+                    <div style="color: #059669; font-weight: bold; font-size: 14px; margin-bottom: 8px;">🥤 Non-Alcoholic People:</div>
+                    <div style="color: #333; font-size: 13px; line-height: 1.5;">${nonAlcoholicPeopleList.map(person => person.name || 'Unnamed').join(', ')}</div>
+                  </div>
+                `;
+              } else {
+                rightColumn = '<div style="color: #666; font-style: italic;">No non-alcoholic people</div>';
+              }
+              
+              return leftColumn + rightColumn;
+            })()
+            }
+          </div>
         </div>
       </div>
 
@@ -252,6 +295,57 @@ const PDFGenerator = ({
       yPosition += 12;
     });
 
+    // Add people section - side by side format
+    yPosition += 20;
+    
+    // Check if we need a new page for people section
+    if (yPosition > 220) {
+      doc.addPage();
+      yPosition = 30;
+    }
+    
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text('PARTY PEOPLE', 20, yPosition);
+    yPosition += 15;
+    
+    // Group people by alcoholic preference
+    const alcoholicPeopleList = people.filter(person => person.isAlcoholic);
+    const nonAlcoholicPeopleList = people.filter(person => !person.isAlcoholic);
+    
+    doc.setFontSize(10);
+    const startYPosition = yPosition;
+    
+    // Left column - Alcoholic people
+    if (alcoholicPeopleList.length > 0) {
+      doc.setTextColor(128, 0, 128); // Purple
+      doc.text('Alcoholic People:', 20, yPosition);
+      yPosition += 12;
+      
+      doc.setTextColor(0, 0, 0);
+      const alcoholicNames = alcoholicPeopleList.map(person => person.name || 'Unnamed').join(', ');
+      const lines = doc.splitTextToSize(alcoholicNames, 80); // Narrower width for side-by-side
+      doc.text(lines, 20, yPosition);
+      yPosition += lines.length * 10;
+    }
+    
+    // Right column - Non-alcoholic people (reset yPosition to start at same level)
+    let rightYPosition = startYPosition;
+    if (nonAlcoholicPeopleList.length > 0) {
+      doc.setTextColor(0, 150, 0); // Green
+      doc.text('Non-Alcoholic People:', 110, rightYPosition);
+      rightYPosition += 12;
+      
+      doc.setTextColor(0, 0, 0);
+      const nonAlcoholicNames = nonAlcoholicPeopleList.map(person => person.name || 'Unnamed').join(', ');
+      const lines = doc.splitTextToSize(nonAlcoholicNames, 80); // Narrower width for side-by-side
+      doc.text(lines, 110, rightYPosition);
+      rightYPosition += lines.length * 10;
+    }
+    
+    // Set yPosition to the maximum of both columns
+    yPosition = Math.max(yPosition, rightYPosition)
+    
     // Add total line
     yPosition += 10;
     doc.setDrawColor(0, 0, 0);
