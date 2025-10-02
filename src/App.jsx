@@ -4,14 +4,36 @@ import PDFGenerator from './components/PDFGenerator';
 
 function App() {
   const [items, setItems] = useState([
+    // non-alcoholic items
     { name: "Chicken", unitPrice: 1100, quantity: 10, isAlcoholic: false },
     { name: "Seasoning", unitPrice: 380, quantity: 3, isAlcoholic: false },
     { name: "Charcoal", unitPrice: 1000, quantity: 1, isAlcoholic: false },
-    { name: "Beer", unitPrice: 3000, quantity: 1, isAlcoholic: true },
+    { name: "Beverages", unitPrice: 3000, quantity: 1, isAlcoholic: false },
+
+    // alcoholic items
+    { name: "Whisky", unitPrice: 6000, quantity: 2, isAlcoholic: true },
   ]);
 
-  const [alcoholicPeople, setAlcoholicPeople] = useState(9);
-  const [nonAlcoholicPeople, setNonAlcoholicPeople] = useState(4);
+  const [people, setPeople] = useState([
+    // non-alcoholic people
+    { name: "Heshan", isAlcoholic: false },
+    { name: "Chamiru", isAlcoholic: false },
+    { name: "Amantha", isAlcoholic: false },
+    { name: "Akindu", isAlcoholic: false },
+    { name: "Sasanka", isAlcoholic: false },
+    { name: "Manuja", isAlcoholic: false },
+
+    // alcoholic people
+    { name: "Venusha", isAlcoholic: true },
+    { name: "Nadil", isAlcoholic: true },
+    { name: "Manuka", isAlcoholic: true },
+    { name: "දතා", isAlcoholic: true },
+    { name: "Susira", isAlcoholic: true },
+    { name: "Sanjula", isAlcoholic: true },
+    { name: "Oshan", isAlcoholic: true },
+    { name: "Chameen", isAlcoholic: true },
+    { name: "Gadda", isAlcoholic: true },
+  ]);
   const [darkMode, setDarkMode] = useState(() => {
     // Check if dark mode was previously saved
     const saved = localStorage.getItem('darkMode');
@@ -40,8 +62,26 @@ function App() {
     setItems(newItems);
   };
 
+  // People management functions
+  const handlePersonChange = (index, field, value) => {
+    const newPeople = [...people];
+    newPeople[index][field] = value;
+    setPeople(newPeople);
+  };
+
+  const addPerson = () => {
+    setPeople([...people, { name: "", isAlcoholic: false }]);
+  };
+
+  const removePerson = (index) => {
+    const newPeople = people.filter((_, i) => i !== index);
+    setPeople(newPeople);
+  };
+
   // Advanced cost calculations
-  const totalPeople = alcoholicPeople + nonAlcoholicPeople;
+  const totalPeople = people.length;
+  const alcoholicPeople = people.filter(person => person.isAlcoholic).length;
+  const nonAlcoholicPeople = people.filter(person => !person.isAlcoholic).length;
   
   const totalAlcoholicCost = items
     .filter(item => item.isAlcoholic)
@@ -470,60 +510,156 @@ function App() {
               <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-sm sm:text-lg mr-3 sm:mr-4 shadow-lg">
                 2
               </span>
-              Number of People
+              Party People
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-              <div className={`p-4 sm:p-6 rounded-2xl border transition-all duration-300 ${
-                darkMode 
-                  ? 'bg-gradient-to-r from-purple-900/30 to-pink-900/30 border-purple-400/30' 
-                  : 'bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200'
-              }`}>
-                <div className="flex flex-col items-center space-y-3">
-                  <label className={`text-lg sm:text-xl font-semibold flex items-center space-x-2 ${
-                    darkMode ? 'text-gray-200' : 'text-gray-700'
-                  }`}>
-                    <span>🍺</span>
-                    <span>Alcoholic People:</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={alcoholicPeople}
-                    onChange={(e) => setAlcoholicPeople(Number(e.target.value))}
-                    className={`w-32 sm:w-24 p-3 border-2 rounded-xl text-center text-xl font-bold focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 ${
-                      darkMode 
-                        ? 'bg-gray-600 border-purple-400 text-white' 
-                        : 'bg-white border-purple-300 text-gray-800'
-                    }`}
-                    min="0"
-                  />
+
+            {/* Mobile Cards - Show on small screens */}
+            <div className="block md:hidden space-y-4">
+              {people.map((person, index) => (
+                <div key={index} className={`border-2 rounded-2xl p-4 shadow-lg transition-all duration-300 ${
+                  darkMode 
+                    ? 'bg-gray-700 border-gray-600' 
+                    : 'bg-white border-gray-200'
+                }`}>
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className={`text-lg font-semibold flex items-center ${
+                      darkMode ? 'text-white' : 'text-gray-800'
+                    }`}>
+                      <span className="text-xl mr-2">👤</span>
+                      Person #{index + 1}
+                    </h3>
+                    <button
+                      onClick={() => removePerson(index)}
+                      className="bg-gradient-to-r from-red-500 to-red-600 text-white p-2 rounded-full hover:from-red-600 hover:to-red-700 transform hover:scale-110 transition-all duration-200 shadow-lg"
+                      title="Remove person"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className={`block text-sm font-medium mb-2 ${
+                        darkMode ? 'text-gray-300' : 'text-gray-600'
+                      }`}>Person Name</label>
+                      <input
+                        type="text"
+                        value={person.name}
+                        onChange={(e) => handlePersonChange(index, "name", e.target.value)}
+                        className={`w-full p-3 border-2 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 font-medium ${
+                          darkMode 
+                            ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
+                            : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500'
+                        }`}
+                        placeholder="Enter person name..."
+                      />
+                    </div>
+                    
+                    {/* Alcoholic Toggle */}
+                    <div className={`p-3 rounded-xl border transition-all duration-300 ${
+                      person.isAlcoholic 
+                        ? (darkMode ? 'bg-purple-900/30 border-purple-400/30' : 'bg-purple-50 border-purple-200')
+                        : (darkMode ? 'bg-green-900/30 border-green-400/30' : 'bg-green-50 border-green-200')
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-sm font-medium flex items-center ${
+                          darkMode ? 'text-gray-300' : 'text-gray-600'
+                        }`}>
+                          {person.isAlcoholic ? '🍺' : '🥤'} {person.isAlcoholic ? 'Drinks Alcohol' : 'Non-Alcoholic'}
+                        </span>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={person.isAlcoholic}
+                            onChange={(e) => handlePersonChange(index, "isAlcoholic", e.target.checked)}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                        </label>
+                      </div>
+                      {person.isAlcoholic && (
+                        <p className={`text-xs mt-1 ${
+                          darkMode ? 'text-purple-400' : 'text-purple-600'
+                        }`}>
+                          Will share alcoholic item costs
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className={`p-4 sm:p-6 rounded-2xl border transition-all duration-300 ${
-                darkMode 
-                  ? 'bg-gradient-to-r from-green-900/30 to-blue-900/30 border-green-400/30' 
-                  : 'bg-gradient-to-r from-green-50 to-blue-50 border-green-200'
-              }`}>
-                <div className="flex flex-col items-center space-y-3">
-                  <label className={`text-lg sm:text-xl font-semibold flex items-center space-x-2 ${
-                    darkMode ? 'text-gray-200' : 'text-gray-700'
-                  }`}>
-                    <span>🥤</span>
-                    <span>Non-Alcoholic People:</span>
-                  </label>
-                  <input
-                    type="number"
-                    value={nonAlcoholicPeople}
-                    onChange={(e) => setNonAlcoholicPeople(Number(e.target.value))}
-                    className={`w-32 sm:w-24 p-3 border-2 rounded-xl text-center text-xl font-bold focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200 ${
-                      darkMode 
-                        ? 'bg-gray-600 border-green-400 text-white' 
-                        : 'bg-white border-green-300 text-gray-800'
-                    }`}
-                    min="0"
-                  />
-                </div>
-              </div>
+              ))}
             </div>
+
+            {/* Desktop Table - Show on medium screens and up */}
+            <div className={`hidden md:block overflow-x-auto rounded-2xl shadow-lg border transition-all duration-300 ${
+              darkMode ? 'border-gray-600' : 'border-gray-200'
+            }`}>
+              <table className="w-full">
+                <thead className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                  <tr>
+                    <th className="p-3 lg:p-4 text-left font-semibold text-sm lg:text-base">👤 Name</th>
+                    <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">🍺 Alcoholic</th>
+                    <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">⚡ Action</th>
+                  </tr>
+                </thead>
+                <tbody className={`transition-all duration-300 ${
+                  darkMode ? 'bg-gray-700' : 'bg-white'
+                }`}>
+                  {people.map((person, index) => (
+                    <tr key={index} className={`border-b transition-colors duration-200 ${
+                      darkMode 
+                        ? `border-gray-600 hover:bg-gray-600 ${person.isAlcoholic ? 'bg-purple-900/20' : 'bg-green-900/20'}` 
+                        : `border-gray-100 hover:bg-gray-50 ${person.isAlcoholic ? 'bg-purple-50/50' : 'bg-green-50/50'}`
+                    }`}>
+                      <td className="p-3 lg:p-4">
+                        <input
+                          type="text"
+                          value={person.name}
+                          onChange={(e) => handlePersonChange(index, "name", e.target.value)}
+                          className={`w-full p-2 lg:p-3 border-2 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all duration-200 font-medium text-sm lg:text-base ${
+                            darkMode 
+                              ? 'bg-gray-600 border-gray-500 text-white placeholder-gray-400' 
+                              : 'bg-white border-gray-200 text-gray-800 placeholder-gray-500'
+                          }`}
+                          placeholder="Enter person name..."
+                        />
+                      </td>
+                      <td className="p-3 lg:p-4 text-center">
+                        <div className="flex items-center justify-center space-x-3">
+                          <span className="text-lg">{person.isAlcoholic ? '🍺' : '🥤'}</span>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={person.isAlcoholic}
+                              onChange={(e) => handlePersonChange(index, "isAlcoholic", e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+                          </label>
+                        </div>
+                      </td>
+                      <td className="p-3 lg:p-4 text-center">
+                        <button
+                          onClick={() => removePerson(index)}
+                          className="bg-gradient-to-r from-red-500 to-red-600 text-white p-2 lg:p-3 rounded-full hover:from-red-600 hover:to-red-700 transform hover:scale-110 transition-all duration-200 shadow-lg hover:shadow-xl"
+                          title="Remove person"
+                        >
+                          🗑️
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <button
+              onClick={addPerson}
+              className="mt-4 sm:mt-6 w-full sm:w-auto bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-2xl font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2 sm:mx-auto"
+            >
+              <span>👤</span>
+              <span>Add New Person</span>
+            </button>
           </div>
 
           {/* Summary Section */}
@@ -640,6 +776,7 @@ function App() {
             {/* PDF Generation Component */}
             <PDFGenerator 
               items={items}
+              people={people}
               alcoholicPeople={alcoholicPeople}
               nonAlcoholicPeople={nonAlcoholicPeople}
               totalCost={totalCost}
