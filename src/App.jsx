@@ -1,39 +1,12 @@
 import React, { useState, useEffect } from "react";
 import Footer from "./components/Footer";
 import PDFGenerator from './components/PDFGenerator';
+import { defaultItems, defaultPeople } from './data/defaultData';
 
 function App() {
-  const [items, setItems] = useState([
-    // non-alcoholic items
-    { name: "Chicken", unitPrice: 1100, quantity: 10, isAlcoholic: false },
-    { name: "Seasoning", unitPrice: 380, quantity: 3, isAlcoholic: false },
-    { name: "Charcoal", unitPrice: 1000, quantity: 1, isAlcoholic: false },
-    { name: "Beverages", unitPrice: 3000, quantity: 1, isAlcoholic: false },
+  const [items, setItems] = useState(defaultItems);
 
-    // alcoholic items
-    { name: "Whisky", unitPrice: 6000, quantity: 2, isAlcoholic: true },
-  ]);
-
-  const [people, setPeople] = useState([
-    // non-alcoholic people
-    { name: "Heshan", isAlcoholic: false },
-    { name: "Chamiru", isAlcoholic: false },
-    { name: "Amantha", isAlcoholic: false },
-    { name: "Akindu", isAlcoholic: false },
-    { name: "Sasanka", isAlcoholic: false },
-    { name: "Manuja", isAlcoholic: false },
-
-    // alcoholic people
-    { name: "Venusha", isAlcoholic: true },
-    { name: "Nadil", isAlcoholic: true },
-    { name: "Manuka", isAlcoholic: true },
-    { name: "දතා", isAlcoholic: true },
-    { name: "Susira", isAlcoholic: true },
-    { name: "Sanjula", isAlcoholic: true },
-    { name: "Oshan", isAlcoholic: true },
-    { name: "Chameen", isAlcoholic: true },
-    { name: "Gadda", isAlcoholic: true },
-  ]);
+  const [people, setPeople] = useState(defaultPeople);
   const [darkMode, setDarkMode] = useState(() => {
     // Check if dark mode was previously saved
     const saved = localStorage.getItem('darkMode');
@@ -402,6 +375,7 @@ function App() {
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
                   <tr>
+                    <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">#</th>
                     <th className="p-3 lg:p-4 text-left font-semibold text-sm lg:text-base">🛍️ Item</th>
                     <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">💰 Unit Price</th>
                     <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">📦 Quantity</th>
@@ -419,6 +393,13 @@ function App() {
                         ? `border-gray-600 hover:bg-gray-600 ${item.isAlcoholic ? 'bg-gray-600/50' : ''}` 
                         : `border-gray-100 hover:bg-gray-50 ${item.isAlcoholic ? 'bg-purple-50/30' : ''}`
                     }`}>
+                      <td className="p-3 lg:p-4 text-center">
+                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
+                          darkMode ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-700'
+                        }`}>
+                          {index + 1}
+                        </span>
+                      </td>
                       <td className="p-3 lg:p-4">
                         <input
                           type="text"
@@ -597,6 +578,7 @@ function App() {
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
                   <tr>
+                    <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">#</th>
                     <th className="p-3 lg:p-4 text-left font-semibold text-sm lg:text-base">👤 Name</th>
                     <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">🍺 Alcoholic</th>
                     <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">⚡ Action</th>
@@ -611,6 +593,13 @@ function App() {
                         ? `border-gray-600 hover:bg-gray-600 ${person.isAlcoholic ? 'bg-purple-900/20' : 'bg-green-900/20'}` 
                         : `border-gray-100 hover:bg-gray-50 ${person.isAlcoholic ? 'bg-purple-50/50' : 'bg-green-50/50'}`
                     }`}>
+                      <td className="p-3 lg:p-4 text-center">
+                        <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
+                          darkMode ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-700'
+                        }`}>
+                          {index + 1}
+                        </span>
+                      </td>
                       <td className="p-3 lg:p-4">
                         <input
                           type="text"
