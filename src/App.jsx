@@ -13,6 +13,11 @@ function App() {
     return saved ? JSON.parse(saved) : false;
   });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // Drag and Drop State
+  const [draggedItemIndex, setDraggedItemIndex] = useState(null);
+  const [draggedPersonIndex, setDraggedPersonIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
 
   const handleChange = (index, field, value) => {
     const newItems = [...items];
@@ -49,6 +54,98 @@ function App() {
   const removePerson = (index) => {
     const newPeople = people.filter((_, i) => i !== index);
     setPeople(newPeople);
+  };
+
+  // Drag and Drop Functions for Items
+  const handleItemDragStart = (e, index) => {
+    setDraggedItemIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', e.target.outerHTML);
+    e.target.style.opacity = '0.5';
+  };
+
+  const handleItemDragEnd = (e) => {
+    e.target.style.opacity = '1';
+    setDraggedItemIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleItemDragOver = (e, index) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+  };
+
+  const handleItemDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleItemDrop = (e, dropIndex) => {
+    e.preventDefault();
+    
+    if (draggedItemIndex === null || draggedItemIndex === dropIndex) {
+      return;
+    }
+
+    const newItems = [...items];
+    const draggedItem = newItems[draggedItemIndex];
+    
+    // Remove dragged item
+    newItems.splice(draggedItemIndex, 1);
+    
+    // Insert at new position
+    const adjustedDropIndex = draggedItemIndex < dropIndex ? dropIndex - 1 : dropIndex;
+    newItems.splice(adjustedDropIndex, 0, draggedItem);
+    
+    setItems(newItems);
+    setDraggedItemIndex(null);
+    setDragOverIndex(null);
+  };
+
+  // Drag and Drop Functions for People
+  const handlePersonDragStart = (e, index) => {
+    setDraggedPersonIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', e.target.outerHTML);
+    e.target.style.opacity = '0.5';
+  };
+
+  const handlePersonDragEnd = (e) => {
+    e.target.style.opacity = '1';
+    setDraggedPersonIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handlePersonDragOver = (e, index) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+  };
+
+  const handlePersonDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handlePersonDrop = (e, dropIndex) => {
+    e.preventDefault();
+    
+    if (draggedPersonIndex === null || draggedPersonIndex === dropIndex) {
+      return;
+    }
+
+    const newPeople = [...people];
+    const draggedPerson = newPeople[draggedPersonIndex];
+    
+    // Remove dragged person
+    newPeople.splice(draggedPersonIndex, 1);
+    
+    // Insert at new position
+    const adjustedDropIndex = draggedPersonIndex < dropIndex ? dropIndex - 1 : dropIndex;
+    newPeople.splice(adjustedDropIndex, 0, draggedPerson);
+    
+    setPeople(newPeople);
+    setDraggedPersonIndex(null);
+    setDragOverIndex(null);
   };
 
   // Advanced cost calculations
@@ -245,27 +342,55 @@ function App() {
         }`}>
           {/* Items Section */}
           <div className="mb-6 sm:mb-10">
-            <h2 className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 lg:mb-8 flex items-center ${
-              darkMode ? 'text-white' : 'text-gray-800'
-            }`}>
-              <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-sm sm:text-lg mr-3 sm:mr-4 shadow-lg">
-                1
-              </span>
-              Party Items
-            </h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 lg:mb-8">
+              <h2 className={`text-xl sm:text-2xl lg:text-3xl font-bold flex items-center ${
+                darkMode ? 'text-white' : 'text-gray-800'
+              }`}>
+                <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-sm sm:text-lg mr-3 sm:mr-4 shadow-lg">
+                  1
+                </span>
+                Party Items
+              </h2>
+              <p className={`text-xs sm:text-sm mt-2 sm:mt-0 flex items-center ${
+                darkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                <span className="mr-1">💡</span>
+                Drag ⋮⋮ to reorder items
+              </p>
+            </div>
 
             {/* Mobile Cards - Show on small screens */}
             <div className="block md:hidden space-y-4">
               {items.map((item, index) => (
-                <div key={index} className={`border-2 rounded-2xl p-4 shadow-lg transition-all duration-300 ${
-                  darkMode 
-                    ? 'bg-gray-700 border-gray-600' 
-                    : 'bg-white border-gray-200'
-                }`}>
+                <div 
+                  key={index} 
+                  draggable
+                  onDragStart={(e) => handleItemDragStart(e, index)}
+                  onDragEnd={handleItemDragEnd}
+                  onDragOver={(e) => handleItemDragOver(e, index)}
+                  onDragLeave={handleItemDragLeave}
+                  onDrop={(e) => handleItemDrop(e, index)}
+                  className={`border-2 rounded-2xl p-4 shadow-lg transition-all duration-300 cursor-move ${
+                    draggedItemIndex === index ? 'opacity-50 transform scale-105' : ''
+                  } ${
+                    dragOverIndex === index && draggedItemIndex !== index 
+                      ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 transform scale-102' 
+                      : ''
+                  } ${
+                    darkMode 
+                      ? 'bg-gray-700 border-gray-600' 
+                      : 'bg-white border-gray-200'
+                  }`}>
                   <div className="flex justify-between items-start mb-4">
                     <h3 className={`text-lg font-semibold flex items-center ${
                       darkMode ? 'text-white' : 'text-gray-800'
                     }`}>
+                      <span 
+                        className="text-lg mr-1 cursor-move opacity-50 hover:opacity-100 transition-all duration-200 hover:text-purple-600 dark:hover:text-purple-400 hover:scale-110"
+                        title="Drag to reorder items"
+                      >
+                        ⋮⋮
+                      </span>
                       <span className="text-xl mr-2">🛍️</span>
                       Item #{index + 1}
                     </h3>
@@ -375,6 +500,7 @@ function App() {
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
                   <tr>
+                    <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base w-12">⋮⋮</th>
                     <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">#</th>
                     <th className="p-3 lg:p-4 text-left font-semibold text-sm lg:text-base">🛍️ Item</th>
                     <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">💰 Unit Price</th>
@@ -388,11 +514,35 @@ function App() {
                   darkMode ? 'bg-gray-700' : 'bg-white'
                 }`}>
                   {items.map((item, index) => (
-                    <tr key={index} className={`border-b transition-colors duration-200 ${
-                      darkMode 
-                        ? `border-gray-600 hover:bg-gray-600 ${item.isAlcoholic ? 'bg-gray-600/50' : ''}` 
-                        : `border-gray-100 hover:bg-gray-50 ${item.isAlcoholic ? 'bg-purple-50/30' : ''}`
-                    }`}>
+                    <tr 
+                      key={index} 
+                      draggable
+                      onDragStart={(e) => handleItemDragStart(e, index)}
+                      onDragEnd={handleItemDragEnd}
+                      onDragOver={(e) => handleItemDragOver(e, index)}
+                      onDragLeave={handleItemDragLeave}
+                      onDrop={(e) => handleItemDrop(e, index)}
+                      className={`border-b transition-colors duration-200 cursor-move ${
+                        draggedItemIndex === index ? 'opacity-50 bg-blue-100 dark:bg-blue-900/30' : ''
+                      } ${
+                        dragOverIndex === index && draggedItemIndex !== index 
+                          ? 'border-purple-500 bg-purple-100 dark:bg-purple-900/30' 
+                          : ''
+                      } ${
+                        darkMode 
+                          ? `border-gray-600 hover:bg-gray-600 ${item.isAlcoholic ? 'bg-gray-600/50' : ''}` 
+                          : `border-gray-100 hover:bg-gray-50 ${item.isAlcoholic ? 'bg-purple-50/30' : ''}`
+                      }`}>
+                      <td className="p-3 lg:p-4 text-center">
+                        <span 
+                          className={`cursor-move opacity-50 hover:opacity-100 transition-all duration-200 text-lg hover:text-purple-600 dark:hover:text-purple-400 hover:scale-110 ${
+                            darkMode ? 'text-gray-400' : 'text-gray-500'
+                          }`}
+                          title="Drag to reorder items"
+                        >
+                          ⋮⋮
+                        </span>
+                      </td>
                       <td className="p-3 lg:p-4 text-center">
                         <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
                           darkMode ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-700'
@@ -485,27 +635,55 @@ function App() {
 
           {/* People Section */}
           <div className="mb-6 sm:mb-10">
-            <h2 className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 flex items-center ${
-              darkMode ? 'text-white' : 'text-gray-800'
-            }`}>
-              <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-sm sm:text-lg mr-3 sm:mr-4 shadow-lg">
-                2
-              </span>
-              Party People
-            </h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6">
+              <h2 className={`text-xl sm:text-2xl lg:text-3xl font-bold flex items-center ${
+                darkMode ? 'text-white' : 'text-gray-800'
+              }`}>
+                <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-sm sm:text-lg mr-3 sm:mr-4 shadow-lg">
+                  2
+                </span>
+                Party People
+              </h2>
+              <p className={`text-xs sm:text-sm mt-2 sm:mt-0 flex items-center ${
+                darkMode ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                <span className="mr-1">💡</span>
+                Drag ⋮⋮ to reorder people
+              </p>
+            </div>
 
             {/* Mobile Cards - Show on small screens */}
             <div className="block md:hidden space-y-4">
               {people.map((person, index) => (
-                <div key={index} className={`border-2 rounded-2xl p-4 shadow-lg transition-all duration-300 ${
-                  darkMode 
-                    ? 'bg-gray-700 border-gray-600' 
-                    : 'bg-white border-gray-200'
-                }`}>
+                <div 
+                  key={index} 
+                  draggable
+                  onDragStart={(e) => handlePersonDragStart(e, index)}
+                  onDragEnd={handlePersonDragEnd}
+                  onDragOver={(e) => handlePersonDragOver(e, index)}
+                  onDragLeave={handlePersonDragLeave}
+                  onDrop={(e) => handlePersonDrop(e, index)}
+                  className={`border-2 rounded-2xl p-4 shadow-lg transition-all duration-300 cursor-move ${
+                    draggedPersonIndex === index ? 'opacity-50 transform scale-105' : ''
+                  } ${
+                    dragOverIndex === index && draggedPersonIndex !== index 
+                      ? 'border-green-500 bg-green-50 dark:bg-green-900/20 transform scale-102' 
+                      : ''
+                  } ${
+                    darkMode 
+                      ? 'bg-gray-700 border-gray-600' 
+                      : 'bg-white border-gray-200'
+                  }`}>
                   <div className="flex justify-between items-start mb-4">
                     <h3 className={`text-lg font-semibold flex items-center ${
                       darkMode ? 'text-white' : 'text-gray-800'
                     }`}>
+                      <span 
+                        className="text-lg mr-1 cursor-move opacity-50 hover:opacity-100 transition-all duration-200 hover:text-green-600 dark:hover:text-green-400 hover:scale-110"
+                        title="Drag to reorder people"
+                      >
+                        ⋮⋮
+                      </span>
                       <span className="text-xl mr-2">👤</span>
                       Person #{index + 1}
                     </h3>
@@ -578,6 +756,7 @@ function App() {
               <table className="w-full">
                 <thead className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
                   <tr>
+                    <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base w-12">⋮⋮</th>
                     <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">#</th>
                     <th className="p-3 lg:p-4 text-left font-semibold text-sm lg:text-base">👤 Name</th>
                     <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">🍺 Alcoholic</th>
@@ -588,11 +767,35 @@ function App() {
                   darkMode ? 'bg-gray-700' : 'bg-white'
                 }`}>
                   {people.map((person, index) => (
-                    <tr key={index} className={`border-b transition-colors duration-200 ${
-                      darkMode 
-                        ? `border-gray-600 hover:bg-gray-600 ${person.isAlcoholic ? 'bg-purple-900/20' : 'bg-green-900/20'}` 
-                        : `border-gray-100 hover:bg-gray-50 ${person.isAlcoholic ? 'bg-purple-50/50' : 'bg-green-50/50'}`
-                    }`}>
+                    <tr 
+                      key={index} 
+                      draggable
+                      onDragStart={(e) => handlePersonDragStart(e, index)}
+                      onDragEnd={handlePersonDragEnd}
+                      onDragOver={(e) => handlePersonDragOver(e, index)}
+                      onDragLeave={handlePersonDragLeave}
+                      onDrop={(e) => handlePersonDrop(e, index)}
+                      className={`border-b transition-colors duration-200 cursor-move ${
+                        draggedPersonIndex === index ? 'opacity-50 bg-blue-100 dark:bg-blue-900/30' : ''
+                      } ${
+                        dragOverIndex === index && draggedPersonIndex !== index 
+                          ? 'border-green-500 bg-green-100 dark:bg-green-900/30' 
+                          : ''
+                      } ${
+                        darkMode 
+                          ? `border-gray-600 hover:bg-gray-600 ${person.isAlcoholic ? 'bg-purple-900/20' : 'bg-green-900/20'}` 
+                          : `border-gray-100 hover:bg-gray-50 ${person.isAlcoholic ? 'bg-purple-50/50' : 'bg-green-50/50'}`
+                      }`}>
+                      <td className="p-3 lg:p-4 text-center">
+                        <span 
+                          className={`cursor-move opacity-50 hover:opacity-100 transition-all duration-200 text-lg hover:text-green-600 dark:hover:text-green-400 hover:scale-110 ${
+                            darkMode ? 'text-gray-400' : 'text-gray-500'
+                          }`}
+                          title="Drag to reorder people"
+                        >
+                          ⋮⋮
+                        </span>
+                      </td>
                       <td className="p-3 lg:p-4 text-center">
                         <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
                           darkMode ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-700'

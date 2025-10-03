@@ -223,3 +223,36 @@ button:focus-visible {
 html {
   scroll-behavior: smooth;
 }
+
+/* Drag and Drop Styles */
+.drag-ghost {
+  opacity: 0.5 !important;
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.drag-over {
+  border-color: #8b5cf6 !important;
+  background-color: rgba(139, 92, 246, 0.1) !important;
+  transform: scale(1.02);
+  transition: all 0.2s ease;
+}
+
+.drag-target {
+  border: 2px dashed #8b5cf6;
+  background-color: rgba(139, 92, 246, 0.05);
+}
+
+/* Drag handle hover effect */
+.drag-handle:hover {
+  color: #8b5cf6 !important;
+  transform: scale(1.1);
+}
+
+/* Prevent text selection during drag */
+.dragging {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
