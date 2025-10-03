@@ -76,30 +76,34 @@ const PDFGenerator = ({
         <h2 style="color: #333; font-size: 20px; margin-bottom: 20px; border-left: 4px solid #7c3aed; padding-left: 15px;">
           🛍️ PARTY ITEMS BREAKDOWN
         </h2>
-        <div style="overflow: hidden; border-radius: 10px; border: 1px solid #e2e8f0;">
-          <div style="background: linear-gradient(to right, #7c3aed, #ec4899); color: white; padding: 15px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px; font-weight: bold; font-size: 13px;">
-            <div>Item Name</div>
-            <div style="text-align: center;">Type</div>
-            <div style="text-align: center;">Unit Price (Rs.)</div>
-            <div style="text-align: center;">Quantity</div>
-            <div style="text-align: center;">Total (Rs.)</div>
-          </div>
-          ${items.map((item, index) => {
-            const itemTotal = item.unitPrice * item.quantity;
-            const itemName = item.name || `Item ${index + 1}`;
-            const itemType = item.isAlcoholic ? '🍺 Alcoholic' : '🥤 Non-Alc';
-            const bgColor = item.isAlcoholic ? '#fdf4ff' : index % 2 === 0 ? '#ffffff' : '#f8fafc';
-            return `
-              <div style="padding: 12px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 12px; border-bottom: 1px solid #e2e8f0; background: ${bgColor};">
-                <div style="font-weight: 500;">${itemName}</div>
-                <div style="text-align: center; font-size: 12px;">${itemType}</div>
-                <div style="text-align: center;">${item.unitPrice.toLocaleString()}</div>
-                <div style="text-align: center;">${item.quantity}</div>
-                <div style="text-align: center; font-weight: bold; color: ${item.isAlcoholic ? '#7c3aed' : '#059669'};">${itemTotal.toLocaleString()}</div>
-              </div>
-            `;
-          }).join('')}
-        </div>
+        <table style="width: 100%; border-collapse: collapse; border-radius: 10px; border: 1px solid #e2e8f0; overflow: hidden;">
+          <thead>
+            <tr style="background: linear-gradient(to right, #7c3aed, #ec4899); color: white;">
+              <th style="padding: 15px; text-align: left; font-weight: bold; font-size: 13px; width: 40%;">Item Name</th>
+              <th style="padding: 15px; text-align: center; font-weight: bold; font-size: 13px; width: 15%;">Type</th>
+              <th style="padding: 15px; text-align: center; font-weight: bold; font-size: 13px; width: 15%;">Unit Price (Rs.)</th>
+              <th style="padding: 15px; text-align: center; font-weight: bold; font-size: 13px; width: 15%;">Quantity</th>
+              <th style="padding: 15px; text-align: center; font-weight: bold; font-size: 13px; width: 15%;">Total (Rs.)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map((item, index) => {
+              const itemTotal = item.unitPrice * item.quantity;
+              const itemName = item.name || `Item ${index + 1}`;
+              const itemType = item.isAlcoholic ? '🍺 Alcoholic' : '🥤 Non-Alc';
+              const bgColor = item.isAlcoholic ? '#fdf4ff' : index % 2 === 0 ? '#ffffff' : '#f8fafc';
+              return `
+                <tr style="background: ${bgColor}; border-bottom: 1px solid #e2e8f0;">
+                  <td style="padding: 12px; font-weight: 500;">${itemName}</td>
+                  <td style="padding: 12px; text-align: center; font-size: 12px;">${itemType}</td>
+                  <td style="padding: 12px; text-align: center;">${item.unitPrice.toLocaleString()}</td>
+                  <td style="padding: 12px; text-align: center;">${item.quantity}</td>
+                  <td style="padding: 12px; text-align: center; font-weight: bold; color: ${item.isAlcoholic ? '#7c3aed' : '#059669'};">${itemTotal.toLocaleString()}</td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
       </div>
 
       <div style="margin-bottom: 30px;">
