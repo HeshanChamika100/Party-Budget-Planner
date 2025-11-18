@@ -2,12 +2,14 @@ import { createClient } from '@sanity/client';
 
 // Create and configure the Sanity client
 export const client = createClient({
-  projectId: '7tl85h8u', // Your project ID from sanity.config.ts
-  dataset: 'production',
-  useCdn: true, // Set to true for faster cached responses
-  apiVersion: '2024-01-01', // Use current date (YYYY-MM-DD) to target the latest API version
-  // Uncomment the line below and add your token if you need authenticated requests
-  // token: process.env.VITE_SANITY_TOKEN,
+  projectId: import.meta.env.VITE_SANITY_PROJECT_ID || '7tl85h8u',
+  dataset: import.meta.env.VITE_SANITY_DATASET || 'production',
+  useCdn: false, // Set to false when using token for write operations
+  apiVersion: import.meta.env.VITE_SANITY_API_VERSION || '2024-01-01',
+  // Token is required for create, update, and delete operations
+  token: import.meta.env.VITE_SANITY_TOKEN || 'skbvUmD31lvGdRLVneMItMVyBBztu7tTrmQhI8UgftZCh6DXbsYgK2ZVarMTDpenymnYHeYQi1j39ga9KzEgfy3DVDjgqTUQQ4SPa2zP45fPdMLWgXsv6UQGocq6QTVTJT7nH2p8whDxis8TLDFi352Mj1GemobgSFBBAZIJihzSIUud0ZGN',
+  // Ignore browser token warning in development
+  ignoreBrowserTokenWarning: true,
 });
 
 // Helper function to fetch all party items
