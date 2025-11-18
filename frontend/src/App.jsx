@@ -1,12 +1,27 @@
 import React, { useState, useEffect } from "react";
 import Footer from "./components/Footer";
 import PDFGenerator from './components/PDFGenerator';
-import { defaultItems, defaultPeople } from './data/defaultData';
+import { usePartyItems, usePartyPeople, LoadingSpinner, ErrorMessage } from './hooks/useSanityData.jsx';
 
 function App() {
-  const [items, setItems] = useState(defaultItems);
+  // Use Sanity hooks for data management
+  const { 
+    items, 
+    loading: itemsLoading, 
+    error: itemsError, 
+    addItem, 
+    updateItem: updateItemHook, 
+    removeItem 
+  } = usePartyItems();
 
-  const [people, setPeople] = useState(defaultPeople);
+  const { 
+    people, 
+    loading: peopleLoading, 
+    error: peopleError, 
+    addPerson, 
+    updatePerson: updatePersonHook, 
+    removePerson 
+  } = usePartyPeople();
   const [darkMode, setDarkMode] = useState(() => {
     // Check if dark mode was previously saved
     const saved = localStorage.getItem('darkMode');
@@ -14,41 +29,14 @@ function App() {
   });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Item management handlers - now using Sanity
   const handleChange = (index, field, value) => {
-    const newItems = [...items];
-    if (field === "name") {
-      newItems[index][field] = value;
-    } else if (field === "isAlcoholic") {
-      newItems[index][field] = value;
-    } else {
-      newItems[index][field] = Number(value);
-    }
-    setItems(newItems);
+    updateItemHook(index, field, value);
   };
 
-  const addItem = () => {
-    setItems([...items, { name: "", unitPrice: 0, quantity: 1, isAlcoholic: false }]);
-  };
-
-  const removeItem = (index) => {
-    const newItems = items.filter((_, i) => i !== index);
-    setItems(newItems);
-  };
-
-  // People management functions
+  // People management handlers - now using Sanity
   const handlePersonChange = (index, field, value) => {
-    const newPeople = [...people];
-    newPeople[index][field] = value;
-    setPeople(newPeople);
-  };
-
-  const addPerson = () => {
-    setPeople([...people, { name: "", isAlcoholic: false }]);
-  };
-
-  const removePerson = (index) => {
-    const newPeople = people.filter((_, i) => i !== index);
-    setPeople(newPeople);
+    updatePersonHook(index, field, value);
   };
 
   // Advanced cost calculations
@@ -102,6 +90,30 @@ function App() {
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
   };
+
+  // Show loading state while fetching from Sanity
+  if (itemsLoading || peopleLoading) {
+    return <LoadingSpinner darkMode={darkMode} />;
+  }
+
+  // Show error state if something went wrong
+  if (itemsError || peopleError) {
+    return (
+      <div className={`min-h-screen transition-all duration-300 p-2 sm:p-4 ${
+        darkMode 
+          ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-black' 
+          : 'bg-gradient-to-br from-purple-400 via-pink-500 to-red-500'
+      }`}>
+        <div className="max-w-6xl mx-auto pt-20">
+          <ErrorMessage 
+            error={itemsError || peopleError} 
+            onRetry={() => window.location.reload()}
+            darkMode={darkMode}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen transition-all duration-300 p-2 sm:p-4 ${
