@@ -1,6 +1,19 @@
 import React from 'react';
 
 function ItemsSection({ localItems, handleChange, handleRemoveItem, handleAddItem, darkMode }) {
+  // Sort items by total price (highest first)
+  const sortedItems = [...localItems].sort((a, b) => {
+    const totalA = (a.unitPrice || 0) * (a.quantity || 0);
+    const totalB = (b.unitPrice || 0) * (b.quantity || 0);
+    return totalB - totalA;
+  });
+
+  // Create a mapping from sorted index to original index
+  const getOriginalIndex = (sortedIndex) => {
+    const sortedItem = sortedItems[sortedIndex];
+    return localItems.findIndex(item => item === sortedItem);
+  };
+
   return (
     <div className="mb-6 sm:mb-10">
       <h2 className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 lg:mb-8 flex items-center ${
@@ -14,21 +27,26 @@ function ItemsSection({ localItems, handleChange, handleRemoveItem, handleAddIte
 
       {/* Mobile Cards - Show on small screens */}
       <div className="block md:hidden space-y-4">
-        {localItems.map((item, index) => (
-          <ItemCardMobile
-            key={index}
-            item={item}
-            index={index}
-            handleChange={handleChange}
-            handleRemoveItem={handleRemoveItem}
-            darkMode={darkMode}
-          />
-        ))}
+        {sortedItems.map((item, sortedIndex) => {
+          const originalIndex = getOriginalIndex(sortedIndex);
+          return (
+            <ItemCardMobile
+              key={originalIndex}
+              item={item}
+              index={originalIndex}
+              displayNumber={sortedIndex + 1}
+              handleChange={handleChange}
+              handleRemoveItem={handleRemoveItem}
+              darkMode={darkMode}
+            />
+          );
+        })}
       </div>
 
       {/* Desktop Table - Show on medium screens and up */}
       <ItemsTable
-        localItems={localItems}
+        localItems={sortedItems}
+        getOriginalIndex={getOriginalIndex}
         handleChange={handleChange}
         handleRemoveItem={handleRemoveItem}
         darkMode={darkMode}
@@ -46,7 +64,7 @@ function ItemsSection({ localItems, handleChange, handleRemoveItem, handleAddIte
 }
 
 // Mobile Card Component
-function ItemCardMobile({ item, index, handleChange, handleRemoveItem, darkMode }) {
+function ItemCardMobile({ item, index, displayNumber, handleChange, handleRemoveItem, darkMode }) {
   return (
     <div className={`border-2 rounded-2xl p-4 shadow-lg transition-all duration-300 ${
       darkMode 
@@ -58,7 +76,7 @@ function ItemCardMobile({ item, index, handleChange, handleRemoveItem, darkMode 
           darkMode ? 'text-white' : 'text-gray-800'
         }`}>
           <span className="text-xl mr-2">🛍️</span>
-          Item #{index + 1}
+          Item #{displayNumber}
         </h3>
         <button
           onClick={() => handleRemoveItem(index)}
@@ -160,7 +178,7 @@ function ItemCardMobile({ item, index, handleChange, handleRemoveItem, darkMode 
 }
 
 // Desktop Table Component
-function ItemsTable({ localItems, handleChange, handleRemoveItem, darkMode }) {
+function ItemsTable({ localItems, getOriginalIndex, handleChange, handleRemoveItem, darkMode }) {
   return (
     <div className={`hidden md:block overflow-x-auto rounded-2xl shadow-lg border transition-all duration-300 ${
       darkMode ? 'border-gray-600' : 'border-gray-200'
@@ -180,7 +198,9 @@ function ItemsTable({ localItems, handleChange, handleRemoveItem, darkMode }) {
         <tbody className={`transition-all duration-300 ${
           darkMode ? 'bg-gray-700' : 'bg-white'
         }`}>
-          {localItems.map((item, index) => (
+          {localItems.map((item, sortedIndex) => {
+            const index = getOriginalIndex(sortedIndex);
+            return (
             <tr key={index} className={`border-b transition-colors duration-200 ${
               darkMode 
                 ? `border-gray-600 hover:bg-gray-600 ${item.isAlcoholic ? 'bg-gray-600/50' : ''}` 
@@ -190,7 +210,7 @@ function ItemsTable({ localItems, handleChange, handleRemoveItem, darkMode }) {
                 <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
                   darkMode ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-700'
                 }`}>
-                  {index + 1}
+                  {sortedIndex + 1}
                 </span>
               </td>
               <td className="p-3 lg:p-4">
@@ -262,7 +282,8 @@ function ItemsTable({ localItems, handleChange, handleRemoveItem, darkMode }) {
                 </button>
               </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>

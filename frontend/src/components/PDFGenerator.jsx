@@ -49,7 +49,7 @@ const PDFGenerator = ({
           📊 BUDGET SUMMARY
         </h2>
         <div style="background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0;">
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px;">
             <div style="text-align: center;">
               <div style="color: #666; font-size: 12px; margin-bottom: 5px;">👥 Total People</div>
               <div style="color: #333; font-size: 20px; font-weight: bold;">${totalPeople}</div>
@@ -58,15 +58,52 @@ const PDFGenerator = ({
               <div style="color: #666; font-size: 12px; margin-bottom: 5px;">💰 Total Cost</div>
               <div style="color: #7c3aed; font-size: 20px; font-weight: bold;">Rs.${totalCost.toLocaleString()}</div>
             </div>
-            <div style="text-align: center;">
-              <div style="color: #666; font-size: 12px; margin-bottom: 5px;">🍺 Alcoholic (${alcoholicPeople})</div>
-              <div style="color: #7c3aed; font-size: 16px; font-weight: bold;">Rs.${totalAlcoholicCost.toLocaleString()}</div>
-              ${alcoholicPeople > 0 ? `<div style="color: #666; font-size: 10px;">Per person: Rs.${alcoholicCostPerPerson.toLocaleString()}</div>` : ''}
+          </div>
+          
+          <!-- HIGHLIGHTED COST PER PERSON SECTION -->
+          <div style="background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%); padding: 25px; border-radius: 12px; margin: 20px 0; box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <div style="color: white; font-size: 18px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">💳 Cost Per Person</div>
+              <div style="height: 2px; background: rgba(255,255,255,0.4); width: 100px; margin: 0 auto;"></div>
             </div>
-            <div style="text-align: center;">
-              <div style="color: #666; font-size: 12px; margin-bottom: 5px;">🥤 Non-Alcoholic (${nonAlcoholicPeople})</div>
-              <div style="color: #059669; font-size: 16px; font-weight: bold;">Rs.${totalNonAlcoholicCost.toLocaleString()}</div>
-              ${nonAlcoholicPeople > 0 ? `<div style="color: #666; font-size: 10px;">Per person: Rs.${nonAlcoholicCostPerPerson.toLocaleString()}</div>` : ''}
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+              ${alcoholicPeople > 0 ? `
+                <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; text-align: center; backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.2);">
+                  <div style="color: rgba(255,255,255,0.9); font-size: 14px; margin-bottom: 8px; font-weight: 600;">🍺 Alcoholic</div>
+                  <div style="color: white; font-size: 32px; font-weight: bold; text-shadow: 0 2px 8px rgba(0,0,0,0.2);">Rs.${alcoholicCostPerPerson.toLocaleString()}</div>
+                  <div style="color: rgba(255,255,255,0.8); font-size: 12px; margin-top: 5px;">${alcoholicPeople} ${alcoholicPeople === 1 ? 'person' : 'people'}</div>
+                </div>
+              ` : `
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; text-align: center; opacity: 0.6;">
+                  <div style="color: white; font-size: 14px; margin-bottom: 8px;">🍺 Alcoholic</div>
+                  <div style="color: white; font-size: 24px; font-weight: bold;">N/A</div>
+                  <div style="color: rgba(255,255,255,0.8); font-size: 12px; margin-top: 5px;">No people</div>
+                </div>
+              `}
+              ${nonAlcoholicPeople > 0 ? `
+                <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; text-align: center; backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.2);">
+                  <div style="color: rgba(255,255,255,0.9); font-size: 14px; margin-bottom: 8px; font-weight: 600;">🥤 Non-Alcoholic</div>
+                  <div style="color: white; font-size: 32px; font-weight: bold; text-shadow: 0 2px 8px rgba(0,0,0,0.2);">Rs.${nonAlcoholicCostPerPerson.toLocaleString()}</div>
+                  <div style="color: rgba(255,255,255,0.8); font-size: 12px; margin-top: 5px;">${nonAlcoholicPeople} ${nonAlcoholicPeople === 1 ? 'person' : 'people'}</div>
+                </div>
+              ` : `
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; text-align: center; opacity: 0.6;">
+                  <div style="color: white; font-size: 14px; margin-bottom: 8px;">🥤 Non-Alcoholic</div>
+                  <div style="color: white; font-size: 24px; font-weight: bold;">N/A</div>
+                  <div style="color: rgba(255,255,255,0.8); font-size: 12px; margin-top: 5px;">No people</div>
+                </div>
+              `}
+            </div>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 15px;">
+            <div style="text-align: center; background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <div style="color: #666; font-size: 12px; margin-bottom: 5px;">🍺 Alcoholic Total (${alcoholicPeople})</div>
+              <div style="color: #7c3aed; font-size: 18px; font-weight: bold;">Rs.${totalAlcoholicCost.toLocaleString()}</div>
+            </div>
+            <div style="text-align: center; background: white; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <div style="color: #666; font-size: 12px; margin-bottom: 5px;">🥤 Non-Alcoholic Total (${nonAlcoholicPeople})</div>
+              <div style="color: #059669; font-size: 18px; font-weight: bold;">Rs.${totalNonAlcoholicCost.toLocaleString()}</div>
             </div>
           </div>
         </div>
@@ -224,40 +261,87 @@ const PDFGenerator = ({
     doc.setTextColor(0, 128, 0);
     doc.text(`Total Cost: Rs.${totalCost.toLocaleString()}`, 20, 90);
     
-    // Costs breakdown in two columns
-    doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0);
-    doc.text(`Alcoholic Cost: Rs.${totalAlcoholicCost.toLocaleString()}`, 20, 105);
+    // HIGHLIGHTED COST PER PERSON SECTION
+    doc.setFillColor(124, 58, 237); // Purple background
+    doc.roundedRect(20, 100, 170, 35, 3, 3, 'F'); // Filled rounded rectangle
+    
+    // Add white border/highlight effect
+    doc.setDrawColor(236, 72, 153); // Pink border
+    doc.setLineWidth(0.5);
+    doc.roundedRect(20, 100, 170, 35, 3, 3);
+    
+    // Title for Cost Per Person section
+    doc.setFontSize(13);
+    doc.setTextColor(255, 255, 255); // White text
+    doc.setFont(undefined, 'bold');
+    doc.text('COST PER PERSON', 105, 110, { align: 'center' });
+    
+    // Draw separator line
+    doc.setDrawColor(255, 255, 255);
+    doc.setLineWidth(0.3);
+    doc.line(30, 113, 180, 113);
+    
+    // Alcoholic Cost Per Person
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'normal');
     if (alcoholicPeople > 0) {
-      doc.text(`Per person: Rs.${alcoholicCostPerPerson.toLocaleString()}`, 110, 105);
+      doc.text('Alcoholic:', 30, 122);
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Rs.${alcoholicCostPerPerson.toLocaleString()}`, 30, 130);
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.text(`(${alcoholicPeople} ${alcoholicPeople === 1 ? 'person' : 'people'})`, 30, 134);
+    } else {
+      doc.text('Alcoholic: N/A', 30, 125);
     }
     
-    doc.text(`Non-Alcoholic Cost: Rs.${totalNonAlcoholicCost.toLocaleString()}`, 20, 115);
+    // Non-Alcoholic Cost Per Person
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'normal');
     if (nonAlcoholicPeople > 0) {
-      doc.text(`Per person: Rs.${nonAlcoholicCostPerPerson.toLocaleString()}`, 110, 115);
+      doc.text('Non-Alcoholic:', 110, 122);
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Rs.${nonAlcoholicCostPerPerson.toLocaleString()}`, 110, 130);
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      doc.text(`(${nonAlcoholicPeople} ${nonAlcoholicPeople === 1 ? 'person' : 'people'})`, 110, 134);
+    } else {
+      doc.text('Non-Alcoholic: N/A', 110, 125);
     }
+    
+    // Reset text color and font
+    doc.setTextColor(0, 0, 0);
+    doc.setFont(undefined, 'normal');
+    doc.setLineWidth(0.1);
+    
+    // Costs breakdown - moved after the highlighted section
+    doc.setFontSize(10);
+    doc.text(`Alcoholic Total: Rs.${totalAlcoholicCost.toLocaleString()}`, 20, 148);
+    doc.text(`Non-Alcoholic Total: Rs.${totalNonAlcoholicCost.toLocaleString()}`, 110, 148);
 
     // Items section - moved up due to compact summary
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);
-    doc.text('PARTY ITEMS BREAKDOWN', 20, 135);
+    doc.text('PARTY ITEMS BREAKDOWN', 20, 163);
 
     // Table headers
     doc.setFontSize(10);
     doc.setTextColor(128, 0, 128);
-    doc.text('Item Name', 20, 150);
-    doc.text('Type', 70, 150);
-    doc.text('Unit Price (Rs.)', 100, 150);
-    doc.text('Quantity', 140, 150);
-    doc.text('Total (Rs.)', 165, 150);
+    doc.text('Item Name', 20, 178);
+    doc.text('Type', 70, 178);
+    doc.text('Unit Price (Rs.)', 100, 178);
+    doc.text('Quantity', 140, 178);
+    doc.text('Total (Rs.)', 165, 178);
 
     // Add line under headers
     doc.setDrawColor(128, 0, 128);
-    doc.line(20, 153, 190, 153);
+    doc.line(20, 181, 190, 181);
 
     // Add items
     doc.setTextColor(0, 0, 0);
-    let yPosition = 165;
+    let yPosition = 193;
     
     items.forEach((item, index) => {
       if (yPosition > 260) { // Check if we need a new page
