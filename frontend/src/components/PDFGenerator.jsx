@@ -3,6 +3,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 const PDFGenerator = ({ 
+  partyName = 'Party',
   items, 
   people = [],
   alcoholicPeople, 
@@ -15,6 +16,8 @@ const PDFGenerator = ({
   darkMode = false
 }) => {
   const totalPeople = alcoholicPeople + nonAlcoholicPeople;
+  const safePartyName = partyName.trim() || 'Party';
+  const fileSafePartyName = safePartyName.replace(/[^a-zA-Z0-9-_ ]/g, '').replace(/\s+/g, '-');
 
   // JPG Generation Function
   const generateJPGReport = async () => {
@@ -38,6 +41,9 @@ const PDFGenerator = ({
         <h1 style="color: #7c3aed; font-size: 28px; margin: 0 0 10px 0; font-weight: bold;">
           🎉 PARTY BUDGET REPORT
         </h1>
+        <p style="color: #7c3aed; font-size: 16px; margin: 0 0 8px 0; font-weight: 600;">
+          ${safePartyName}
+        </p>
         <p style="color: #666; font-size: 14px; margin: 0;">
           Generated on: ${currentDate} at ${currentTime}
         </p>
@@ -201,7 +207,7 @@ const PDFGenerator = ({
 
       // Convert canvas to JPG and download
       const link = document.createElement('a');
-      link.download = `Party-Budget-Report-${currentDate.replace(/\//g, '-')}.jpg`;
+      link.download = `${fileSafePartyName}-Budget-Report-${currentDate.replace(/\//g, '-')}.jpg`;
       link.href = canvas.toDataURL('image/jpeg', 0.9);
       link.click();
 
@@ -223,14 +229,18 @@ const PDFGenerator = ({
     doc.setTextColor(128, 0, 128); // Purple color
     doc.text('PARTY BUDGET REPORT', 20, 30);
 
+    doc.setFontSize(13);
+    doc.setTextColor(128, 0, 128);
+    doc.text(safePartyName, 20, 38);
+
     // Add date and time
     doc.setFontSize(12);
     doc.setTextColor(100, 100, 100);
-    doc.text(`Generated on: ${currentDate} at ${currentTime}`, 20, 45);
+    doc.text(`Generated on: ${currentDate} at ${currentTime}`, 20, 48);
 
     // Add separator line
     doc.setDrawColor(200, 200, 200);
-    doc.line(20, 50, 190, 50);
+    doc.line(20, 53, 190, 53);
 
     // Summary section - more compact
     doc.setFontSize(14);
@@ -468,7 +478,7 @@ const PDFGenerator = ({
 
     // Save the PDF with a clean filename
     const cleanDate = currentDate.replace(/\//g, '-').replace(/\\/g, '-');
-    doc.save(`Party-Budget-Report-${cleanDate}.pdf`);
+    doc.save(`${fileSafePartyName}-Budget-Report-${cleanDate}.pdf`);
   };
 
   return (

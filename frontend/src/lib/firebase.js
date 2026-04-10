@@ -2,10 +2,13 @@ import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 import {
   collection,
+  deleteDoc,
   doc,
+  getDoc,
   getDocs,
   getFirestore,
   writeBatch,
+  setDoc,
 } from 'firebase/firestore';
 import { defaultItems, defaultPeople } from '../data/defaultData';
 
@@ -46,6 +49,7 @@ export const initializeFirebaseAnalytics = () => {
 
 const itemsCollection = collection(db, 'partyItems');
 const peopleCollection = collection(db, 'partyPeople');
+const partiesCollection = collection(db, 'parties');
 
 const toNumber = (value, fallback = 0) => {
   const parsed = Number(value);
@@ -80,6 +84,24 @@ const normalizePerson = (snapshot, fallbackOrder = 0) => {
   };
 };
 
+const normalizeArrayItem = (item = {}, fallbackOrder = 0) => ({
+  name: item.name ?? '',
+  unitPrice: toNumber(item.unitPrice),
+  quantity: toNumber(item.quantity, 1),
+  isAlcoholic: Boolean(item.isAlcoholic),
+  order: toNumber(item.order, fallbackOrder),
+  createdAt: item.createdAt ?? null,
+  updatedAt: item.updatedAt ?? null,
+});
+
+const normalizeArrayPerson = (person = {}, fallbackOrder = 0) => ({
+  name: person.name ?? '',
+  isAlcoholic: Boolean(person.isAlcoholic),
+  order: toNumber(person.order, fallbackOrder),
+  createdAt: person.createdAt ?? null,
+  updatedAt: person.updatedAt ?? null,
+});
+
 const sortByOrder = (left, right) => {
   const leftOrder = toNumber(left.order);
   const rightOrder = toNumber(right.order);
@@ -94,6 +116,74 @@ const sortByOrder = (left, right) => {
 const fetchCollection = async (collectionRef, normalizer) => {
   const snapshot = await getDocs(collectionRef);
   return snapshot.docs.map(normalizer).sort(sortByOrder);
+};
+
+const fetchParties = async () => {
+  const snapshot = await getDocs(partiesCollection);
+
+  return snapshot.docs
+    .map((partySnapshot) => {
+      const data = partySnapshot.data();
+      return {
+        _id: partySnapshot.id,
+        name: data.name ?? 'Untitled Party',
+        createdAt: data.createdAt ?? null,
+        updatedAt: data.updatedAt ?? null,
+        itemCount: Array.isArray(data.items) ? data.items.length : 0,
+        peopleCount: Array.isArray(data.people) ? data.people.length : 0,
+      };
+    })
+    .sort((left, right) => (left.createdAt ?? '').localeCompare(right.createdAt ?? ''));
+};
+
+const sanitizeItems = (items) =>
+  items.map(({ _id, _isNew, ...item }, index) => ({
+    ...item,
+    order: index,
+    isAlcoholic: Boolean(item.isAlcoholic),
+    unitPrice: toNumber(item.unitPrice),
+    quantity: toNumber(item.quantity, 1),
+  }));
+
+const sanitizePeople = (people) =>
+  people.map(({ _id, _isNew, ...person }, index) => ({
+    ...person,
+    order: index,
+    isAlcoholic: Boolean(person.isAlcoholic),
+  }));
+
+const writePartyDocument = async (partyId, { name, items, people, createdAt = null }) => {
+  const timestamp = new Date().toISOString();
+  const partyRef = doc(partiesCollection, partyId);
+
+  const nextItems = sanitizeItems(items).map((item) => ({
+    ...item,
+    createdAt: item.createdAt ?? timestamp,
+    updatedAt: timestamp,
+  }));
+
+  const nextPeople = sanitizePeople(people).map((person) => ({
+    ...person,
+    createdAt: person.createdAt ?? timestamp,
+    updatedAt: timestamp,
+  }));
+
+  await setDoc(partyRef, {
+    name,
+    items: nextItems,
+    people: nextPeople,
+    createdAt: createdAt ?? timestamp,
+    updatedAt: timestamp,
+  });
+
+  return {
+    _id: partyId,
+    name,
+    items: nextItems,
+    people: nextPeople,
+    createdAt: createdAt ?? timestamp,
+    updatedAt: timestamp,
+  };
 };
 
 const replaceCollection = async (collectionRef, records) => {
@@ -139,6 +229,34 @@ export const loadPartyData = async () => {
   return { items, people };
 };
 
+export const listParties = async () => {
+  return fetchParties();
+};
+
+export const ensurePartyStore = async () => {
+  const existingParties = await fetchParties();
+
+  if (existingParties.length > 0) {
+    return existingParties;
+  }
+
+  const [items, people] = await Promise.all([
+    fetchCollection(itemsCollection, normalizeItem),
+    fetchCollection(peopleCollection, normalizePerson),
+  ]);
+
+  const hasLegacyData = items.length > 0 || people.length > 0;
+  const baseItems = hasLegacyData ? items : defaultItems;
+  const basePeople = hasLegacyData ? people : defaultPeople;
+
+  await createParty('My Party', {
+    items: baseItems,
+    people: basePeople,
+  });
+
+  return fetchParties();
+};
+
 export const seedPartyData = async () => {
   const [items, people] = await Promise.all([
     replaceCollection(itemsCollection, defaultItems),
@@ -148,25 +266,104 @@ export const seedPartyData = async () => {
   return { items, people };
 };
 
-export const savePartyData = async (items, people) => {
-  const normalizedItems = items.map(({ _id, _isNew, ...item }, index) => ({
-    ...item,
-    order: index,
-    isAlcoholic: Boolean(item.isAlcoholic),
-    unitPrice: toNumber(item.unitPrice),
-    quantity: toNumber(item.quantity, 1),
-  }));
+export const createParty = async (partyName, options = {}) => {
+  const name = partyName?.trim() || 'Untitled Party';
+  const items = options.items ?? defaultItems;
+  const people = options.people ?? defaultPeople;
+  const partyRef = doc(partiesCollection);
 
-  const normalizedPeople = people.map(({ _id, _isNew, ...person }, index) => ({
-    ...person,
-    order: index,
-    isAlcoholic: Boolean(person.isAlcoholic),
-  }));
+  await writePartyDocument(partyRef.id, {
+    name,
+    items,
+    people,
+  });
 
-  const [savedItems, savedPeople] = await Promise.all([
-    replaceCollection(itemsCollection, normalizedItems),
-    replaceCollection(peopleCollection, normalizedPeople),
-  ]);
+  return {
+    _id: partyRef.id,
+    name,
+  };
+};
 
-  return { items: savedItems, people: savedPeople };
+export const loadPartyDataById = async (partyId) => {
+  const partyRef = doc(partiesCollection, partyId);
+  const snapshot = await getDoc(partyRef);
+
+  if (!snapshot.exists()) {
+    throw new Error('Selected party was not found.');
+  }
+
+  const data = snapshot.data();
+  const items = (Array.isArray(data.items) ? data.items : [])
+    .map((item, index) => normalizeArrayItem(item, index))
+    .sort(sortByOrder);
+  const people = (Array.isArray(data.people) ? data.people : [])
+    .map((person, index) => normalizeArrayPerson(person, index))
+    .sort(sortByOrder);
+
+  return {
+    _id: snapshot.id,
+    name: data.name ?? 'Untitled Party',
+    createdAt: data.createdAt ?? null,
+    updatedAt: data.updatedAt ?? null,
+    items,
+    people,
+  };
+};
+
+export const savePartyData = async (partyId, items, people) => {
+  const existingParty = await loadPartyDataById(partyId);
+
+  const savedParty = await writePartyDocument(partyId, {
+    name: existingParty.name,
+    items,
+    people,
+    createdAt: existingParty.createdAt,
+  });
+
+  return {
+    party: {
+      _id: savedParty._id,
+      name: savedParty.name,
+    },
+    items: savedParty.items,
+    people: savedParty.people,
+  };
+};
+
+export const renameParty = async (partyId, nextName) => {
+  const normalizedName = nextName?.trim();
+
+  if (!normalizedName) {
+    throw new Error('Party name cannot be empty.');
+  }
+
+  const existingParty = await loadPartyDataById(partyId);
+  const savedParty = await writePartyDocument(partyId, {
+    name: normalizedName,
+    items: existingParty.items,
+    people: existingParty.people,
+    createdAt: existingParty.createdAt,
+  });
+
+  return {
+    _id: savedParty._id,
+    name: savedParty.name,
+  };
+};
+
+export const deleteParty = async (partyId) => {
+  const partyRef = doc(partiesCollection, partyId);
+  await deleteDoc(partyRef);
+
+  let remainingParties = await fetchParties();
+
+  if (remainingParties.length === 0) {
+    await createParty('My Party', {
+      items: defaultItems,
+      people: defaultPeople,
+    });
+    remainingParties = await fetchParties();
+  }
+
+  return remainingParties;
 };

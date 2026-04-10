@@ -11,21 +11,12 @@ export function useLocalChanges(items, people, {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Sync remote items into local state when loaded.
+  // Sync selected party data into local editable state.
   useEffect(() => {
-    if (items.length > 0 && localItems.length === 0) {
-      setLocalItems(items);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items]);
-
-  // Sync remote people into local state when loaded.
-  useEffect(() => {
-    if (people.length > 0 && localPeople.length === 0) {
-      setLocalPeople(people);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [people]);
+    setLocalItems(items);
+    setLocalPeople(people);
+    setHasUnsavedChanges(false);
+  }, [items, people]);
 
   // Item handlers
   const handleChange = (index, field, value) => {

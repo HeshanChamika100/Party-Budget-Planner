@@ -4,6 +4,7 @@ import PDFGenerator from './PDFGenerator';
 function BudgetSummary({
   localItems,
   localPeople,
+  partyName,
   totalPeople,
   alcoholicPeople,
   nonAlcoholicPeople,
@@ -67,6 +68,7 @@ function BudgetSummary({
 
       {/* PDF Generation Component */}
       <PDFGenerator 
+        partyName={partyName}
         items={localItems}
         people={localPeople}
         alcoholicPeople={alcoholicPeople}

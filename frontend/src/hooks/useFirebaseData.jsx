@@ -1,5 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import { initializeFirebaseAnalytics, loadPartyData, savePartyData, seedPartyData } from '../lib/firebase';
+import {
+  createParty,
+  deleteParty,
+  ensurePartyStore,
+  initializeFirebaseAnalytics,
+  listParties,
+  loadPartyDataById,
+  renameParty,
+  savePartyData,
+} from '../lib/firebase';
 
 const toUserFriendlyMessage = (error, fallbackMessage) => {
   if (error?.code === 'permission-denied') {
@@ -12,19 +21,38 @@ const toUserFriendlyMessage = (error, fallbackMessage) => {
 export const usePartyData = () => {
   const [items, setItems] = useState([]);
   const [people, setPeople] = useState([]);
+  const [parties, setParties] = useState([]);
+  const [selectedPartyId, setSelectedPartyId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const refresh = useCallback(async () => {
+  const loadData = useCallback(async (preferredPartyId = null) => {
     setLoading(true);
 
     try {
       await initializeFirebaseAnalytics();
-      let data = await loadPartyData();
 
-      if (data.items.length === 0 && data.people.length === 0) {
-        data = await seedPartyData();
+      const availableParties = await ensurePartyStore();
+      setParties(availableParties);
+
+      const fallbackPartyId = availableParties[0]?._id ?? null;
+      const resolvedPartyId =
+        preferredPartyId && availableParties.some((party) => party._id === preferredPartyId)
+          ? preferredPartyId
+          : selectedPartyId && availableParties.some((party) => party._id === selectedPartyId)
+            ? selectedPartyId
+            : fallbackPartyId;
+
+      setSelectedPartyId(resolvedPartyId);
+
+      if (!resolvedPartyId) {
+        setItems([]);
+        setPeople([]);
+        setError(null);
+        return;
       }
+
+      const data = await loadPartyDataById(resolvedPartyId);
 
       setItems(data.items);
       setPeople(data.people);
@@ -35,17 +63,76 @@ export const usePartyData = () => {
     } finally {
       setLoading(false);
     }
+  }, [selectedPartyId]);
+
+  const refresh = useCallback(async () => {
+    await loadData(selectedPartyId);
+  }, [loadData, selectedPartyId]);
+
+  const selectParty = useCallback(async (partyId) => {
+    await loadData(partyId);
+  }, [loadData]);
+
+  const createNewParty = useCallback(async (partyName) => {
+    const createdParty = await createParty(partyName);
+    await loadData(createdParty._id);
+    return createdParty;
+  }, [loadData]);
+
+  const renameExistingParty = useCallback(async (partyId, partyName) => {
+    const renamedParty = await renameParty(partyId, partyName);
+    const availableParties = await listParties();
+    setParties(availableParties);
+    setError(null);
+    return renamedParty;
+  }, []);
+
+  const deleteExistingParty = useCallback(async (partyId) => {
+    setLoading(true);
+
+    try {
+      const remainingParties = await deleteParty(partyId);
+      const nextPartyId = remainingParties[0]?._id ?? null;
+
+      setParties(remainingParties);
+      setSelectedPartyId(nextPartyId);
+
+      if (nextPartyId) {
+        const nextPartyData = await loadPartyDataById(nextPartyId);
+        setItems(nextPartyData.items);
+        setPeople(nextPartyData.people);
+      } else {
+        setItems([]);
+        setPeople([]);
+      }
+
+      setError(null);
+      return remainingParties;
+    } catch (deleteError) {
+      console.error('Error deleting party:', deleteError);
+      setError(toUserFriendlyMessage(deleteError, 'Failed to delete party'));
+      throw deleteError;
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
-    refresh();
-  }, [refresh]);
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const saveData = useCallback(async (nextItems, nextPeople) => {
+  const saveData = useCallback(async (nextItems, nextPeople, partyId = selectedPartyId) => {
     try {
-      const savedState = await savePartyData(nextItems, nextPeople);
+      if (!partyId) {
+        throw new Error('Please select a party before saving.');
+      }
+
+      const savedState = await savePartyData(partyId, nextItems, nextPeople);
       setItems(savedState.items);
       setPeople(savedState.people);
+      const availableParties = await listParties();
+      setParties(availableParties);
       setError(null);
       return savedState;
     } catch (saveError) {
@@ -53,14 +140,20 @@ export const usePartyData = () => {
       setError(toUserFriendlyMessage(saveError, 'Failed to save party data'));
       throw saveError;
     }
-  }, []);
+  }, [selectedPartyId]);
 
   return {
     items,
     people,
+    parties,
+    selectedPartyId,
     loading,
     error,
     savePartyData: saveData,
+    selectParty,
+    createParty: createNewParty,
+    renameParty: renameExistingParty,
+    deleteParty: deleteExistingParty,
     refresh,
   };
 };
