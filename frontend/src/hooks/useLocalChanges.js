@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 /**
  * Custom hook to manage local state with unsaved changes tracking.
@@ -132,10 +133,10 @@ export function useLocalChanges(items, people, {
       setLocalItems(savedState.items);
       setLocalPeople(savedState.people);
       setHasUnsavedChanges(false);
-      alert('✅ Changes saved successfully!');
+      toast.success('Changes saved successfully.');
     } catch (error) {
       console.error('Error saving changes:', error);
-      alert('❌ Failed to save changes. Please try again.');
+      toast.error('Failed to save changes. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -147,6 +148,7 @@ export function useLocalChanges(items, people, {
       setLocalItems(items);
       setLocalPeople(people);
       setHasUnsavedChanges(false);
+      toast('Changes discarded.');
     }
   };
 

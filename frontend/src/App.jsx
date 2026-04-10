@@ -7,6 +7,7 @@ import PeopleSection from "./components/PeopleSection";
 import BudgetSummary from "./components/BudgetSummary";
 import { usePartyData, LoadingSpinner, ErrorMessage } from './hooks/useFirebaseData.jsx';
 import { useLocalChanges } from './hooks/useLocalChanges';
+import { Toaster, toast } from 'react-hot-toast';
 
 function App() {
   const {
@@ -152,10 +153,10 @@ function App() {
 
     try {
       await renameParty(selectedPartyId, normalizedName);
-      alert('✅ Party renamed successfully!');
+      toast.success('Party renamed successfully.');
     } catch (renameError) {
       console.error('Failed to rename party:', renameError);
-      alert('❌ Failed to rename party. Please try again.');
+      toast.error('Failed to rename party. Please try again.');
     }
   };
 
@@ -184,10 +185,10 @@ function App() {
 
     try {
       await deleteParty(selectedPartyId);
-      alert('🗑️ Party deleted. Switched to another available party.');
+      toast.success('Party deleted. Switched to another available party.');
     } catch (deleteError) {
       console.error('Failed to delete party:', deleteError);
-      alert('❌ Failed to delete party. Please try again.');
+      toast.error('Failed to delete party. Please try again.');
     }
   };
 
@@ -230,6 +231,34 @@ function App() {
           onSave={handleSaveChanges}
           onDiscard={handleDiscardChanges}
           darkMode={darkMode}
+        />
+
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3200,
+            style: {
+              borderRadius: '18px',
+              fontSize: '14px',
+              padding: '14px 16px',
+              boxShadow: '0 18px 50px -24px rgba(15, 23, 42, 0.55)',
+              border: darkMode ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(226,232,240,0.8)',
+              background: darkMode ? 'rgba(2, 6, 23, 0.95)' : 'rgba(255, 255, 255, 0.96)',
+              color: darkMode ? '#f8fafc' : '#0f172a',
+            },
+            success: {
+              iconTheme: {
+                primary: '#10b981',
+                secondary: '#ffffff',
+              },
+            },
+            error: {
+              iconTheme: {
+                primary: '#ef4444',
+                secondary: '#ffffff',
+              },
+            },
+          }}
         />
         
         {/* Header with Logo and Dark Mode Toggle */}
