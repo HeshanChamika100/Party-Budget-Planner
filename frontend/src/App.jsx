@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import SaveBanner from "./components/SaveBanner";
@@ -50,6 +50,8 @@ function App() {
     return saved ? JSON.parse(saved) : false;
   });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [createPartyPrompt, setCreatePartyPrompt] = useState(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 
   const selectedParty = parties.find((party) => party._id === selectedPartyId) ?? null;
   const selectedPartyName = selectedParty?.name ?? 'My Party';
@@ -100,6 +102,36 @@ function App() {
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
+  const promptCreateParty = (defaultName) => {
+    return new Promise((resolve) => {
+      setCreatePartyPrompt({ defaultName, resolve });
+    });
+  };
+
+  const closeCreatePartyPrompt = (result) => {
+    if (!createPartyPrompt) {
+      return;
+    }
+
+    createPartyPrompt.resolve(result);
+    setCreatePartyPrompt(null);
+  };
+
+  const confirmDeleteParty = (partyName) => {
+    return new Promise((resolve) => {
+      setDeleteConfirmation({ partyName, resolve });
+    });
+  };
+
+  const closeDeleteConfirmation = (result) => {
+    if (!deleteConfirmation) {
+      return;
+    }
+
+    deleteConfirmation.resolve(result);
+    setDeleteConfirmation(null);
+  };
+
   const handleSelectParty = async (nextPartyId) => {
     if (!nextPartyId || nextPartyId === selectedPartyId) {
       return;
@@ -119,10 +151,10 @@ function App() {
   };
 
   const handleCreateParty = async () => {
-    const partyName = prompt('Enter a name for the new party:', `Party ${parties.length + 1}`);
-    const normalizedName = partyName?.trim();
+    const defaultName = `Party ${parties.length + 1}`;
+    const nextPartyName = await promptCreateParty(defaultName);
 
-    if (!normalizedName) {
+    if (!nextPartyName) {
       return;
     }
 
@@ -136,7 +168,7 @@ function App() {
       }
     }
 
-    await createParty(normalizedName);
+    await createParty(nextPartyName);
   };
 
   const handleRenameParty = async () => {
@@ -165,9 +197,7 @@ function App() {
       return;
     }
 
-    const shouldDelete = confirm(
-      `Delete "${selectedPartyName}"? This removes its budget items and people permanently.`
-    );
+    const shouldDelete = await confirmDeleteParty(selectedPartyName);
 
     if (!shouldDelete) {
       return;
@@ -222,6 +252,73 @@ function App() {
         <div className={`absolute right-[-7rem] top-44 h-[28rem] w-[28rem] rounded-full blur-3xl ${darkMode ? 'bg-cyan-500/10' : 'bg-amber-300/20'}`} />
         <div className={`absolute bottom-0 left-0 h-64 w-64 rounded-full blur-3xl ${darkMode ? 'bg-violet-500/10' : 'bg-orange-200/25'}`} />
       </div>
+
+      {createPartyPrompt && (
+        <CreatePartyModal
+          defaultName={createPartyPrompt.defaultName}
+          darkMode={darkMode}
+          onCancel={() => closeCreatePartyPrompt(null)}
+          onCreate={(value) => closeCreatePartyPrompt(value)}
+        />
+      )}
+
+      {deleteConfirmation && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/35 p-4 backdrop-blur-sm">
+          <div
+            className={`w-[min(92vw,28rem)] rounded-3xl border p-4 shadow-2xl backdrop-blur-xl ${
+              darkMode
+                ? 'border-white/10 bg-slate-950/95 text-slate-100'
+                : 'border-slate-200 bg-white/95 text-slate-900'
+            }`}
+          >
+            <div className="flex items-start gap-3">
+              <div className={`mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-lg ${
+                darkMode ? 'bg-rose-500/10 text-rose-300' : 'bg-rose-50 text-rose-600'
+              }`}>
+                🗑️
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p className={`font-display text-base font-semibold ${darkMode ? 'text-white' : 'text-slate-950'}`}>
+                  Delete this party?
+                </p>
+                <p className={`mt-1 text-sm leading-relaxed ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                  <span className="font-semibold">{deleteConfirmation.partyName}</span> and all of its items and people will be removed permanently.
+                </p>
+
+                {hasUnsavedChanges && (
+                  <p className={`mt-2 rounded-2xl border px-3 py-2 text-xs leading-relaxed ${
+                    darkMode
+                      ? 'border-amber-400/20 bg-amber-400/10 text-amber-200'
+                      : 'border-amber-200 bg-amber-50 text-amber-800'
+                  }`}>
+                    You also have unsaved changes in this party. Deleting it will discard those edits.
+                  </p>
+                )}
+
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <button
+                    onClick={() => closeDeleteConfirmation(false)}
+                    className={`rounded-2xl px-4 py-2 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 ${
+                      darkMode
+                        ? 'bg-white/5 text-slate-100 hover:bg-white/10'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => closeDeleteConfirmation(true)}
+                    className="rounded-2xl bg-rose-500 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-rose-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-600"
+                  >
+                    Delete party
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="relative mx-auto max-w-7xl px-3 py-4 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
         {/* Unsaved Changes Banner */}
@@ -377,3 +474,93 @@ function App() {
 }
 
 export default App;
+
+function CreatePartyModal({ defaultName, darkMode, onCancel, onCreate }) {
+  const [partyName, setPartyName] = useState(defaultName);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+    inputRef.current?.select();
+  }, []);
+
+  const normalizedName = partyName.trim();
+  const canCreate = normalizedName.length > 0;
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm">
+      <div
+        className={`w-[min(92vw,30rem)] rounded-[2rem] border p-5 shadow-2xl ${
+          darkMode
+            ? 'border-white/10 bg-slate-950/95 text-slate-100'
+            : 'border-slate-200 bg-white/95 text-slate-900'
+        }`}
+      >
+        <div className="flex items-start gap-4">
+          <div className={`mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-xl ${
+            darkMode ? 'bg-fuchsia-500/10 text-fuchsia-300' : 'bg-fuchsia-50 text-fuchsia-600'
+          }`}>
+            ✨
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <p className={`font-display text-lg font-semibold ${darkMode ? 'text-white' : 'text-slate-950'}`}>
+              Create a new party
+            </p>
+            <p className={`mt-1 text-sm leading-relaxed ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+              Give this party a name before you start adding items and people.
+            </p>
+
+            <label className="mt-4 block">
+              <span className={`mb-2 block text-xs font-semibold uppercase tracking-[0.24em] ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                Party name
+              </span>
+              <input
+                ref={inputRef}
+                type="text"
+                value={partyName}
+                onChange={(event) => setPartyName(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' && canCreate) {
+                    event.preventDefault();
+                    onCreate(normalizedName);
+                  }
+                  if (event.key === 'Escape') {
+                    event.preventDefault();
+                    onCancel();
+                  }
+                }}
+                className={`w-full rounded-2xl border px-4 py-3 text-sm font-medium outline-none transition-all duration-200 focus:-translate-y-0.5 focus:ring-4 ${
+                  darkMode
+                    ? 'border-white/10 bg-white/5 text-white placeholder-slate-500 focus:border-fuchsia-400 focus:ring-fuchsia-400/20'
+                    : 'border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:border-fuchsia-400 focus:ring-fuchsia-200'
+                }`}
+                placeholder="Enter party name"
+              />
+            </label>
+
+            <div className="mt-4 flex flex-wrap gap-3">
+              <button
+                onClick={onCancel}
+                className={`rounded-2xl px-4 py-2 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 ${
+                  darkMode
+                    ? 'bg-white/5 text-slate-100 hover:bg-white/10'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => canCreate && onCreate(normalizedName)}
+                disabled={!canCreate}
+                className="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Create party
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
