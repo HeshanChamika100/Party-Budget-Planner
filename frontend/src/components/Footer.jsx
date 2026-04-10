@@ -49,7 +49,7 @@ const Footer = ({ darkMode = false }) => {
   return (
     <footer className="mt-6 pb-2 sm:mt-10">
       <div className={`grid items-start gap-3 lg:auto-rows-fr lg:grid-cols-[1.35fr_1fr] ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>
-        <div className={`flex h-full flex-col rounded-[1.75rem] border p-4 shadow-[0_18px_60px_-42px_rgba(15,23,42,0.45)] backdrop-blur-xl sm:p-5 ${
+        <div className={`relative flex h-full flex-col rounded-[1.75rem] border p-4 shadow-[0_18px_60px_-42px_rgba(15,23,42,0.45)] backdrop-blur-xl sm:p-5 ${
           darkMode ? 'border-white/10 bg-white/5' : 'border-white/70 bg-white/70'
         }`}>
           <div className="mb-3 flex items-center justify-between gap-3">
@@ -63,7 +63,31 @@ const Footer = ({ darkMode = false }) => {
             </div>
           </div>
 
-          <div className="flex flex-1 items-center gap-3 py-1">
+          <button
+            onClick={goToPreviousTip}
+            className={`absolute left-3 top-1/2 z-10 !h-8 !w-8 !min-h-0 !min-w-0 -translate-y-1/2 rounded-full border p-0 text-white transition-all duration-200 hover:-translate-y-1/2 hover:scale-105 ${
+              darkMode
+                ? 'border-cyan-300/30 bg-cyan-500/80 hover:bg-cyan-500'
+                : 'border-cyan-500/20 bg-cyan-600 hover:bg-cyan-700'
+            }`}
+            aria-label="Previous tip"
+          >
+            <span className="text-xs leading-none">◀</span>
+          </button>
+
+          <button
+            onClick={goToNextTip}
+            className={`absolute right-3 top-1/2 z-10 !h-8 !w-8 !min-h-0 !min-w-0 -translate-y-1/2 rounded-full border p-0 text-white transition-all duration-200 hover:-translate-y-1/2 hover:scale-105 ${
+              darkMode
+                ? 'border-cyan-300/30 bg-cyan-500/80 hover:bg-cyan-500'
+                : 'border-cyan-500/20 bg-cyan-600 hover:bg-cyan-700'
+            }`}
+            aria-label="Next tip"
+          >
+            <span className="text-xs leading-none">▶</span>
+          </button>
+
+          <div className="flex flex-1 items-center gap-3 py-1 pr-10 sm:pr-12">
             <div className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-sm ${
               darkMode ? 'bg-cyan-400/10 text-cyan-300' : 'bg-cyan-50 text-cyan-700'
             }`}>
@@ -79,45 +103,21 @@ const Footer = ({ darkMode = false }) => {
             </div>
           </div>
 
-          <div className="mt-2 flex items-center justify-between gap-3">
+          <div className="mt-2 flex items-center justify-center gap-2">
             <div className="flex gap-2">
               {partyTips.map((_, index) => (
                 <button
+                  type="button"
                   key={index}
                   onClick={() => setCurrentTip(index)}
                   aria-label={`Go to tip ${index + 1}`}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                  className={`!min-h-0 !min-w-0 rounded-full transition-all duration-300 ${
                     index === currentTip
-                      ? (darkMode ? 'w-8 bg-cyan-300' : 'w-8 bg-cyan-600')
-                      : (darkMode ? 'w-3 bg-white/15 hover:bg-white/30' : 'w-3 bg-slate-300 hover:bg-slate-400')
+                      ? (darkMode ? '!h-2 !w-8 bg-cyan-300' : '!h-2 !w-8 bg-cyan-600')
+                      : (darkMode ? '!h-2 !w-3 bg-white/15 hover:bg-cyan-300/40' : '!h-2 !w-3 bg-slate-300 hover:bg-cyan-500/60')
                   }`}
                 />
               ))}
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={goToPreviousTip}
-                className={`rounded-xl border px-2.5 py-1 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 ${
-                  darkMode
-                    ? 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
-                    : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                }`}
-                aria-label="Previous tip"
-              >
-                Prev
-              </button>
-              <button
-                onClick={goToNextTip}
-                className={`rounded-xl border px-2.5 py-1 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 ${
-                  darkMode
-                    ? 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
-                    : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
-                }`}
-                aria-label="Next tip"
-              >
-                Next
-              </button>
             </div>
           </div>
         </div>
