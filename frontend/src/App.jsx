@@ -26,9 +26,11 @@ function App() {
     handleChange,
     handleAddItem,
     handleRemoveItem,
+    handleReorderItems,
     handlePersonChange,
     handleAddPerson,
     handleRemovePerson,
+    handleReorderPeople,
     handleSaveChanges,
     handleDiscardChanges,
   } = useLocalChanges(items, people, {
@@ -145,6 +147,7 @@ function App() {
             handleChange={handleChange}
             handleRemoveItem={handleRemoveItem}
             handleAddItem={handleAddItem}
+            handleReorderItems={handleReorderItems}
             darkMode={darkMode}
           />
 
@@ -154,6 +157,7 @@ function App() {
             handlePersonChange={handlePersonChange}
             handleRemovePerson={handleRemovePerson}
             handleAddPerson={handleAddPerson}
+            handleReorderPeople={handleReorderPeople}
             darkMode={darkMode}
           />
 

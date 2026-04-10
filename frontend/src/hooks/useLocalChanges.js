@@ -57,6 +57,30 @@ export function useLocalChanges(items, people, {
     setHasUnsavedChanges(true);
   };
 
+  const handleReorderItems = (fromIndex, toIndex) => {
+    if (fromIndex === toIndex) {
+      return;
+    }
+
+    setLocalItems((currentItems) => {
+      if (
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= currentItems.length ||
+        toIndex >= currentItems.length
+      ) {
+        return currentItems;
+      }
+
+      const nextItems = [...currentItems];
+      const [movedItem] = nextItems.splice(fromIndex, 1);
+      nextItems.splice(toIndex, 0, movedItem);
+      return nextItems;
+    });
+
+    setHasUnsavedChanges(true);
+  };
+
   // People handlers
   const handlePersonChange = (index, field, value) => {
     setLocalPeople((currentPeople) => {
@@ -82,6 +106,30 @@ export function useLocalChanges(items, people, {
 
   const handleRemovePerson = (index) => {
     setLocalPeople((currentPeople) => currentPeople.filter((_, i) => i !== index));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleReorderPeople = (fromIndex, toIndex) => {
+    if (fromIndex === toIndex) {
+      return;
+    }
+
+    setLocalPeople((currentPeople) => {
+      if (
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= currentPeople.length ||
+        toIndex >= currentPeople.length
+      ) {
+        return currentPeople;
+      }
+
+      const nextPeople = [...currentPeople];
+      const [movedPerson] = nextPeople.splice(fromIndex, 1);
+      nextPeople.splice(toIndex, 0, movedPerson);
+      return nextPeople;
+    });
+
     setHasUnsavedChanges(true);
   };
 
@@ -119,9 +167,11 @@ export function useLocalChanges(items, people, {
     handleChange,
     handleAddItem,
     handleRemoveItem,
+    handleReorderItems,
     handlePersonChange,
     handleAddPerson,
     handleRemovePerson,
+    handleReorderPeople,
     handleSaveChanges,
     handleDiscardChanges,
   };

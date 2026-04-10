@@ -1,6 +1,46 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-function PeopleSection({ localPeople, handlePersonChange, handleRemovePerson, handleAddPerson, darkMode }) {
+function PeopleSection({
+  localPeople,
+  handlePersonChange,
+  handleRemovePerson,
+  handleAddPerson,
+  handleReorderPeople,
+  darkMode,
+}) {
+  const [draggedIndex, setDraggedIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
+
+  const onDragStart = (index, event) => {
+    setDraggedIndex(index);
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', String(index));
+  };
+
+  const onDragOver = (index, event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const onDrop = (targetIndex) => {
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      setDragOverIndex(null);
+      return;
+    }
+
+    handleReorderPeople(draggedIndex, targetIndex);
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const onDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
   return (
     <div className="mb-6 sm:mb-10">
       <h2 className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 flex items-center ${
@@ -22,6 +62,11 @@ function PeopleSection({ localPeople, handlePersonChange, handleRemovePerson, ha
             handlePersonChange={handlePersonChange}
             handleRemovePerson={handleRemovePerson}
             darkMode={darkMode}
+            onDragStart={onDragStart}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            onDragEnd={onDragEnd}
+            isDragTarget={dragOverIndex === index && draggedIndex !== index}
           />
         ))}
       </div>
@@ -32,6 +77,12 @@ function PeopleSection({ localPeople, handlePersonChange, handleRemovePerson, ha
         handlePersonChange={handlePersonChange}
         handleRemovePerson={handleRemovePerson}
         darkMode={darkMode}
+        onDragStart={onDragStart}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+        onDragEnd={onDragEnd}
+        draggedIndex={draggedIndex}
+        dragOverIndex={dragOverIndex}
       />
 
       <button
@@ -46,13 +97,27 @@ function PeopleSection({ localPeople, handlePersonChange, handleRemovePerson, ha
 }
 
 // Mobile Card Component
-function PersonCardMobile({ person, index, handlePersonChange, handleRemovePerson, darkMode }) {
+function PersonCardMobile({
+  person,
+  index,
+  handlePersonChange,
+  handleRemovePerson,
+  darkMode,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  isDragTarget,
+}) {
   return (
     <div className={`border-2 rounded-2xl p-4 shadow-lg transition-all duration-300 ${
       darkMode 
         ? 'bg-gray-700 border-gray-600' 
         : 'bg-white border-gray-200'
-    }`}>
+    } ${isDragTarget ? 'ring-2 ring-green-400 ring-offset-2 ring-offset-transparent' : ''}`}
+      onDragOver={(event) => onDragOver(index, event)}
+      onDrop={() => onDrop(index)}
+    >
       <div className="flex justify-between items-start mb-4">
         <h3 className={`text-lg font-semibold flex items-center ${
           darkMode ? 'text-white' : 'text-gray-800'
@@ -60,13 +125,26 @@ function PersonCardMobile({ person, index, handlePersonChange, handleRemovePerso
           <span className="text-xl mr-2">👤</span>
           Person #{index + 1}
         </h3>
-        <button
-          onClick={() => handleRemovePerson(index)}
-          className="bg-gradient-to-r from-red-500 to-red-600 text-white p-2 rounded-full hover:from-red-600 hover:to-red-700 transform hover:scale-110 transition-all duration-200 shadow-lg"
-          title="Remove person"
-        >
-          🗑️
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            draggable
+            onDragStart={(event) => onDragStart(index, event)}
+            onDragEnd={onDragEnd}
+            className="bg-gradient-to-r from-green-500 to-green-600 text-white p-2 rounded-full hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg cursor-grab active:cursor-grabbing"
+            title="Drag to reorder"
+            aria-label={`Drag person ${index + 1} to reorder`}
+          >
+            ⋮⋮
+          </button>
+          <button
+            onClick={() => handleRemovePerson(index)}
+            className="bg-gradient-to-r from-red-500 to-red-600 text-white p-2 rounded-full hover:from-red-600 hover:to-red-700 transform hover:scale-110 transition-all duration-200 shadow-lg"
+            title="Remove person"
+          >
+            🗑️
+          </button>
+        </div>
       </div>
       
       <div className="space-y-4">
@@ -123,7 +201,18 @@ function PersonCardMobile({ person, index, handlePersonChange, handleRemovePerso
 }
 
 // Desktop Table Component
-function PeopleTable({ localPeople, handlePersonChange, handleRemovePerson, darkMode }) {
+function PeopleTable({
+  localPeople,
+  handlePersonChange,
+  handleRemovePerson,
+  darkMode,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  draggedIndex,
+  dragOverIndex,
+}) {
   return (
     <div className={`hidden md:block overflow-x-auto rounded-2xl shadow-lg border transition-all duration-300 ${
       darkMode ? 'border-gray-600' : 'border-gray-200'
@@ -131,6 +220,7 @@ function PeopleTable({ localPeople, handlePersonChange, handleRemovePerson, dark
       <table className="w-full">
         <thead className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
           <tr>
+            <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">↕</th>
             <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">#</th>
             <th className="p-3 lg:p-4 text-left font-semibold text-sm lg:text-base">👤 Name</th>
             <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">🍺 Alcoholic</th>
@@ -141,11 +231,29 @@ function PeopleTable({ localPeople, handlePersonChange, handleRemovePerson, dark
           darkMode ? 'bg-gray-700' : 'bg-white'
         }`}>
           {localPeople.map((person, index) => (
-            <tr key={index} className={`border-b transition-colors duration-200 ${
-              darkMode 
-                ? `border-gray-600 hover:bg-gray-600 ${person.isAlcoholic ? 'bg-purple-900/20' : 'bg-green-900/20'}` 
-                : `border-gray-100 hover:bg-gray-50 ${person.isAlcoholic ? 'bg-purple-50/50' : 'bg-green-50/50'}`
-            }`}>
+            <tr
+              key={index}
+              className={`border-b transition-colors duration-200 ${
+                darkMode 
+                  ? `border-gray-600 hover:bg-gray-600 ${person.isAlcoholic ? 'bg-purple-900/20' : 'bg-green-900/20'}` 
+                  : `border-gray-100 hover:bg-gray-50 ${person.isAlcoholic ? 'bg-purple-50/50' : 'bg-green-50/50'}`
+              } ${dragOverIndex === index && draggedIndex !== index ? 'ring-2 ring-green-400 ring-inset' : ''}`}
+              onDragOver={(event) => onDragOver(index, event)}
+              onDrop={() => onDrop(index)}
+            >
+              <td className="p-3 lg:p-4 text-center">
+                <button
+                  type="button"
+                  draggable
+                  onDragStart={(event) => onDragStart(index, event)}
+                  onDragEnd={onDragEnd}
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-500 text-white hover:bg-green-600 transition-colors cursor-grab active:cursor-grabbing"
+                  title="Drag to reorder"
+                  aria-label={`Drag person ${index + 1} to reorder`}
+                >
+                  ⋮⋮
+                </button>
+              </td>
               <td className="p-3 lg:p-4 text-center">
                 <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
                   darkMode ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-700'

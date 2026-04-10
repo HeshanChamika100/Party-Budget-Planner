@@ -1,17 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-function ItemsSection({ localItems, handleChange, handleRemoveItem, handleAddItem, darkMode }) {
-  // Sort items by total price (highest first)
-  const sortedItems = [...localItems].sort((a, b) => {
-    const totalA = (a.unitPrice || 0) * (a.quantity || 0);
-    const totalB = (b.unitPrice || 0) * (b.quantity || 0);
-    return totalB - totalA;
-  });
+function ItemsSection({
+  localItems,
+  handleChange,
+  handleRemoveItem,
+  handleAddItem,
+  handleReorderItems,
+  darkMode,
+}) {
+  const [draggedIndex, setDraggedIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
 
-  // Create a mapping from sorted index to original index
-  const getOriginalIndex = (sortedIndex) => {
-    const sortedItem = sortedItems[sortedIndex];
-    return localItems.findIndex(item => item === sortedItem);
+  const onDragStart = (index, event) => {
+    setDraggedIndex(index);
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', String(index));
+  };
+
+  const onDragOver = (index, event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const onDrop = (targetIndex) => {
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      setDragOverIndex(null);
+      return;
+    }
+
+    handleReorderItems(draggedIndex, targetIndex);
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const onDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
   };
 
   return (
@@ -27,29 +54,36 @@ function ItemsSection({ localItems, handleChange, handleRemoveItem, handleAddIte
 
       {/* Mobile Cards - Show on small screens */}
       <div className="block md:hidden space-y-4">
-        {sortedItems.map((item, sortedIndex) => {
-          const originalIndex = getOriginalIndex(sortedIndex);
-          return (
-            <ItemCardMobile
-              key={originalIndex}
-              item={item}
-              index={originalIndex}
-              displayNumber={sortedIndex + 1}
-              handleChange={handleChange}
-              handleRemoveItem={handleRemoveItem}
-              darkMode={darkMode}
-            />
-          );
-        })}
+        {localItems.map((item, index) => (
+          <ItemCardMobile
+            key={index}
+            item={item}
+            index={index}
+            displayNumber={index + 1}
+            handleChange={handleChange}
+            handleRemoveItem={handleRemoveItem}
+            darkMode={darkMode}
+            onDragStart={onDragStart}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            onDragEnd={onDragEnd}
+            isDragTarget={dragOverIndex === index && draggedIndex !== index}
+          />
+        ))}
       </div>
 
       {/* Desktop Table - Show on medium screens and up */}
       <ItemsTable
-        localItems={sortedItems}
-        getOriginalIndex={getOriginalIndex}
+        localItems={localItems}
         handleChange={handleChange}
         handleRemoveItem={handleRemoveItem}
         darkMode={darkMode}
+        onDragStart={onDragStart}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+        onDragEnd={onDragEnd}
+        draggedIndex={draggedIndex}
+        dragOverIndex={dragOverIndex}
       />
 
       <button
@@ -64,13 +98,28 @@ function ItemsSection({ localItems, handleChange, handleRemoveItem, handleAddIte
 }
 
 // Mobile Card Component
-function ItemCardMobile({ item, index, displayNumber, handleChange, handleRemoveItem, darkMode }) {
+function ItemCardMobile({
+  item,
+  index,
+  displayNumber,
+  handleChange,
+  handleRemoveItem,
+  darkMode,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  isDragTarget,
+}) {
   return (
     <div className={`border-2 rounded-2xl p-4 shadow-lg transition-all duration-300 ${
       darkMode 
         ? 'bg-gray-700 border-gray-600' 
         : 'bg-white border-gray-200'
-    }`}>
+    } ${isDragTarget ? 'ring-2 ring-blue-400 ring-offset-2 ring-offset-transparent' : ''}`}
+      onDragOver={(event) => onDragOver(index, event)}
+      onDrop={() => onDrop(index)}
+    >
       <div className="flex justify-between items-start mb-4">
         <h3 className={`text-lg font-semibold flex items-center ${
           darkMode ? 'text-white' : 'text-gray-800'
@@ -78,13 +127,26 @@ function ItemCardMobile({ item, index, displayNumber, handleChange, handleRemove
           <span className="text-xl mr-2">🛍️</span>
           Item #{displayNumber}
         </h3>
-        <button
-          onClick={() => handleRemoveItem(index)}
-          className="bg-gradient-to-r from-red-500 to-red-600 text-white p-2 rounded-full hover:from-red-600 hover:to-red-700 transform hover:scale-110 transition-all duration-200 shadow-lg"
-          title="Remove item"
-        >
-          🗑️
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            draggable
+            onDragStart={(event) => onDragStart(index, event)}
+            onDragEnd={onDragEnd}
+            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-2 rounded-full hover:from-blue-600 hover:to-blue-700 transition-all duration-200 shadow-lg cursor-grab active:cursor-grabbing"
+            title="Drag to reorder"
+            aria-label={`Drag item ${displayNumber} to reorder`}
+          >
+            ⋮⋮
+          </button>
+          <button
+            onClick={() => handleRemoveItem(index)}
+            className="bg-gradient-to-r from-red-500 to-red-600 text-white p-2 rounded-full hover:from-red-600 hover:to-red-700 transform hover:scale-110 transition-all duration-200 shadow-lg"
+            title="Remove item"
+          >
+            🗑️
+          </button>
+        </div>
       </div>
       
       <div className="space-y-4">
@@ -178,7 +240,18 @@ function ItemCardMobile({ item, index, displayNumber, handleChange, handleRemove
 }
 
 // Desktop Table Component
-function ItemsTable({ localItems, getOriginalIndex, handleChange, handleRemoveItem, darkMode }) {
+function ItemsTable({
+  localItems,
+  handleChange,
+  handleRemoveItem,
+  darkMode,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  draggedIndex,
+  dragOverIndex,
+}) {
   return (
     <div className={`hidden md:block overflow-x-auto rounded-2xl shadow-lg border transition-all duration-300 ${
       darkMode ? 'border-gray-600' : 'border-gray-200'
@@ -186,6 +259,7 @@ function ItemsTable({ localItems, getOriginalIndex, handleChange, handleRemoveIt
       <table className="w-full">
         <thead className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
           <tr>
+            <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">↕</th>
             <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">#</th>
             <th className="p-3 lg:p-4 text-left font-semibold text-sm lg:text-base">🛍️ Item</th>
             <th className="p-3 lg:p-4 text-center font-semibold text-sm lg:text-base">💰 Unit Price</th>
@@ -198,19 +272,36 @@ function ItemsTable({ localItems, getOriginalIndex, handleChange, handleRemoveIt
         <tbody className={`transition-all duration-300 ${
           darkMode ? 'bg-gray-700' : 'bg-white'
         }`}>
-          {localItems.map((item, sortedIndex) => {
-            const index = getOriginalIndex(sortedIndex);
+          {localItems.map((item, index) => {
             return (
-            <tr key={index} className={`border-b transition-colors duration-200 ${
+            <tr
+              key={index}
+              className={`border-b transition-colors duration-200 ${
               darkMode 
                 ? `border-gray-600 hover:bg-gray-600 ${item.isAlcoholic ? 'bg-gray-600/50' : ''}` 
                 : `border-gray-100 hover:bg-gray-50 ${item.isAlcoholic ? 'bg-purple-50/30' : ''}`
-            }`}>
+              } ${dragOverIndex === index && draggedIndex !== index ? 'ring-2 ring-blue-400 ring-inset' : ''}`}
+              onDragOver={(event) => onDragOver(index, event)}
+              onDrop={() => onDrop(index)}
+            >
+              <td className="p-3 lg:p-4 text-center">
+                <button
+                  type="button"
+                  draggable
+                  onDragStart={(event) => onDragStart(index, event)}
+                  onDragEnd={onDragEnd}
+                  className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition-colors cursor-grab active:cursor-grabbing"
+                  title="Drag to reorder"
+                  aria-label={`Drag item ${index + 1} to reorder`}
+                >
+                  ⋮⋮
+                </button>
+              </td>
               <td className="p-3 lg:p-4 text-center">
                 <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold ${
                   darkMode ? 'bg-gray-600 text-white' : 'bg-gray-100 text-gray-700'
                 }`}>
-                  {sortedIndex + 1}
+                  {index + 1}
                 </span>
               </td>
               <td className="p-3 lg:p-4">
