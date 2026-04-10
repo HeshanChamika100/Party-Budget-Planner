@@ -1,22 +1,17 @@
 import { useState, useEffect } from 'react';
 
 /**
- * Custom hook to manage local state with unsaved changes tracking
+ * Custom hook to manage local state with unsaved changes tracking.
  */
 export function useLocalChanges(items, people, {
-  addItem,
-  updateItem,
-  removeItem,
-  addPerson,
-  updatePerson,
-  removePerson
+  savePartyData,
 }) {
   const [localItems, setLocalItems] = useState([]);
   const [localPeople, setLocalPeople] = useState([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Sync items from Sanity to local state when loaded
+  // Sync remote items into local state when loaded.
   useEffect(() => {
     if (items.length > 0 && localItems.length === 0) {
       setLocalItems(items);
@@ -24,7 +19,7 @@ export function useLocalChanges(items, people, {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
-  // Sync people from Sanity to local state when loaded
+  // Sync remote people into local state when loaded.
   useEffect(() => {
     if (people.length > 0 && localPeople.length === 0) {
       setLocalPeople(people);
@@ -34,12 +29,14 @@ export function useLocalChanges(items, people, {
 
   // Item handlers
   const handleChange = (index, field, value) => {
-    const newItems = [...localItems];
-    newItems[index] = {
-      ...newItems[index],
-      [field]: field === "name" ? value : (field === "isAlcoholic" ? value : Number(value))
-    };
-    setLocalItems(newItems);
+    setLocalItems((currentItems) => {
+      const nextItems = [...currentItems];
+      nextItems[index] = {
+        ...nextItems[index],
+        [field]: field === 'name' ? value : field === 'isAlcoholic' ? value : Number(value),
+      };
+      return nextItems;
+    });
     setHasUnsavedChanges(true);
   };
 
@@ -51,24 +48,25 @@ export function useLocalChanges(items, people, {
       isAlcoholic: false,
       _isNew: true
     };
-    setLocalItems([...localItems, newItem]);
+    setLocalItems((currentItems) => [...currentItems, newItem]);
     setHasUnsavedChanges(true);
   };
 
   const handleRemoveItem = (index) => {
-    const newItems = localItems.filter((_, i) => i !== index);
-    setLocalItems(newItems);
+    setLocalItems((currentItems) => currentItems.filter((_, i) => i !== index));
     setHasUnsavedChanges(true);
   };
 
   // People handlers
   const handlePersonChange = (index, field, value) => {
-    const newPeople = [...localPeople];
-    newPeople[index] = {
-      ...newPeople[index],
-      [field]: value
-    };
-    setLocalPeople(newPeople);
+    setLocalPeople((currentPeople) => {
+      const nextPeople = [...currentPeople];
+      nextPeople[index] = {
+        ...nextPeople[index],
+        [field]: value,
+      };
+      return nextPeople;
+    });
     setHasUnsavedChanges(true);
   };
 
@@ -78,64 +76,22 @@ export function useLocalChanges(items, people, {
       isAlcoholic: false,
       _isNew: true
     };
-    setLocalPeople([...localPeople, newPerson]);
+    setLocalPeople((currentPeople) => [...currentPeople, newPerson]);
     setHasUnsavedChanges(true);
   };
 
   const handleRemovePerson = (index) => {
-    const newPeople = localPeople.filter((_, i) => i !== index);
-    setLocalPeople(newPeople);
+    setLocalPeople((currentPeople) => currentPeople.filter((_, i) => i !== index));
     setHasUnsavedChanges(true);
   };
 
-  // Save all changes to backend
+  // Save all changes to Firebase.
   const handleSaveChanges = async () => {
     setIsSaving(true);
     try {
-      // Save items
-      for (let i = 0; i < localItems.length; i++) {
-        const item = localItems[i];
-        if (item._isNew) {
-          const { _isNew, ...itemData } = item;
-          await addItem(itemData);
-        } else if (item._id) {
-          await updateItem(i, "name", item.name);
-          await updateItem(i, "unitPrice", item.unitPrice);
-          await updateItem(i, "quantity", item.quantity);
-          await updateItem(i, "isAlcoholic", item.isAlcoholic);
-        }
-      }
-
-      // Handle deleted items
-      for (const item of items) {
-        const exists = localItems.find(li => li._id === item._id);
-        if (!exists && item._id) {
-          const index = items.findIndex(i => i._id === item._id);
-          await removeItem(index);
-        }
-      }
-
-      // Save people
-      for (let i = 0; i < localPeople.length; i++) {
-        const person = localPeople[i];
-        if (person._isNew) {
-          const { _isNew, ...personData } = person;
-          await addPerson(personData);
-        } else if (person._id) {
-          await updatePerson(i, "name", person.name);
-          await updatePerson(i, "isAlcoholic", person.isAlcoholic);
-        }
-      }
-
-      // Handle deleted people
-      for (const person of people) {
-        const exists = localPeople.find(lp => lp._id === person._id);
-        if (!exists && person._id) {
-          const index = people.findIndex(p => p._id === person._id);
-          await removePerson(index);
-        }
-      }
-
+      const savedState = await savePartyData(localItems, localPeople);
+      setLocalItems(savedState.items);
+      setLocalPeople(savedState.people);
       setHasUnsavedChanges(false);
       alert('✅ Changes saved successfully!');
     } catch (error) {

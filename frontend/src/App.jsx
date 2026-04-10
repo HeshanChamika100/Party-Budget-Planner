@@ -5,30 +5,19 @@ import SaveBanner from "./components/SaveBanner";
 import ItemsSection from "./components/ItemsSection";
 import PeopleSection from "./components/PeopleSection";
 import BudgetSummary from "./components/BudgetSummary";
-import { usePartyItems, usePartyPeople, LoadingSpinner, ErrorMessage } from './hooks/useSanityData.jsx';
+import { usePartyData, LoadingSpinner, ErrorMessage } from './hooks/useFirebaseData.jsx';
 import { useLocalChanges } from './hooks/useLocalChanges';
 
 function App() {
-  // Use Sanity hooks for data management
-  const { 
-    items, 
-    loading: itemsLoading, 
-    error: itemsError, 
-    addItem, 
-    updateItem: updateItemHook, 
-    removeItem 
-  } = usePartyItems();
+  const {
+    items,
+    people,
+    loading,
+    error,
+    savePartyData,
+    refresh,
+  } = usePartyData();
 
-  const { 
-    people, 
-    loading: peopleLoading, 
-    error: peopleError, 
-    addPerson, 
-    updatePerson: updatePersonHook, 
-    removePerson 
-  } = usePartyPeople();
-  
-  // Use local changes hook for managing unsaved changes
   const {
     localItems,
     localPeople,
@@ -43,12 +32,7 @@ function App() {
     handleSaveChanges,
     handleDiscardChanges,
   } = useLocalChanges(items, people, {
-    addItem,
-    updateItem: updateItemHook,
-    removeItem,
-    addPerson,
-    updatePerson: updatePersonHook,
-    removePerson,
+    savePartyData,
   });
 
   // UI state
@@ -102,12 +86,11 @@ function App() {
   const toggleDarkMode = () => setDarkMode(!darkMode);
 
   // Loading state
-  if (itemsLoading || peopleLoading) {
+  if (loading) {
     return <LoadingSpinner darkMode={darkMode} />;
   }
 
-  // Error state
-  if (itemsError || peopleError) {
+  if (error) {
     return (
       <div className={`min-h-screen transition-all duration-300 p-2 sm:p-4 ${
         darkMode 
@@ -116,8 +99,8 @@ function App() {
       }`}>
         <div className="max-w-6xl mx-auto pt-20">
           <ErrorMessage 
-            error={itemsError || peopleError} 
-            onRetry={() => window.location.reload()}
+            error={error} 
+            onRetry={refresh}
             darkMode={darkMode}
           />
         </div>
