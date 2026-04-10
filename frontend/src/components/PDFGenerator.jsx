@@ -144,39 +144,24 @@ const PDFGenerator = ({
           👥 PARTY PEOPLE
         </h2>
         <div style="background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-            ${(() => {
-              const alcoholicPeopleList = people.filter(person => person.isAlcoholic);
-              const nonAlcoholicPeopleList = people.filter(person => !person.isAlcoholic);
-              
-              let leftColumn = '';
-              let rightColumn = '';
-              
-              if (alcoholicPeopleList.length > 0) {
-                leftColumn = `
-                  <div>
-                    <div style="color: #7c3aed; font-weight: bold; font-size: 14px; margin-bottom: 8px;">🍺 Alcoholic People:</div>
-                    <div style="color: #333; font-size: 13px; line-height: 1.5;">${alcoholicPeopleList.map(person => person.name || 'Unnamed').join(', ')}</div>
-                  </div>
-                `;
-              } else {
-                leftColumn = '<div style="color: #666; font-style: italic;">No alcoholic people</div>';
-              }
-              
-              if (nonAlcoholicPeopleList.length > 0) {
-                rightColumn = `
-                  <div>
-                    <div style="color: #059669; font-weight: bold; font-size: 14px; margin-bottom: 8px;">🥤 Non-Alcoholic People:</div>
-                    <div style="color: #333; font-size: 13px; line-height: 1.5;">${nonAlcoholicPeopleList.map(person => person.name || 'Unnamed').join(', ')}</div>
-                  </div>
-                `;
-              } else {
-                rightColumn = '<div style="color: #666; font-style: italic;">No non-alcoholic people</div>';
-              }
-              
-              return leftColumn + rightColumn;
-            })()
-            }
+          <div style="overflow: hidden; border-radius: 10px; border: 1px solid #e2e8f0; background: white;">
+            <div style="background: linear-gradient(to right, #7c3aed, #ec4899); color: white; padding: 12px; display: grid; grid-template-columns: 60px 1fr 160px; gap: 12px; font-weight: bold; font-size: 13px;">
+              <div style="text-align: center;">#</div>
+              <div>Name</div>
+              <div style="text-align: center;">Type</div>
+            </div>
+            ${people.map((person, index) => {
+              const personName = person.name || `Person ${index + 1}`;
+              const personType = person.isAlcoholic ? '🍺 Alcoholic' : '🥤 Non-Alcoholic';
+              const bgColor = index % 2 === 0 ? '#ffffff' : '#f8fafc';
+              return `
+                <div style="padding: 12px; display: grid; grid-template-columns: 60px 1fr 160px; gap: 12px; border-bottom: 1px solid #e2e8f0; background: ${bgColor};">
+                  <div style="text-align: center; font-weight: 600; color: #475569;">${index + 1}</div>
+                  <div style="font-weight: 500; color: #111827;">${personName}</div>
+                  <div style="text-align: center; color: ${person.isAlcoholic ? '#7c3aed' : '#059669'}; font-weight: 600;">${personType}</div>
+                </div>
+              `;
+            }).join('')}
           </div>
         </div>
       </div>
@@ -381,7 +366,7 @@ const PDFGenerator = ({
       yPosition += 12;
     });
 
-    // Add people section - side by side format
+    // Add people section
     yPosition += 20;
     
     // Check if we need a new page for people section
@@ -393,44 +378,45 @@ const PDFGenerator = ({
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);
     doc.text('PARTY PEOPLE', 20, yPosition);
-    yPosition += 15;
-    
-    // Group people by alcoholic preference
-    const alcoholicPeopleList = people.filter(person => person.isAlcoholic);
-    const nonAlcoholicPeopleList = people.filter(person => !person.isAlcoholic);
-    
-    doc.setFontSize(10);
-    const startYPosition = yPosition;
-    
-    // Left column - Alcoholic people
-    if (alcoholicPeopleList.length > 0) {
-      doc.setTextColor(128, 0, 128); // Purple
-      doc.text('Alcoholic People:', 20, yPosition);
+    yPosition += 12;
+
+    const drawPeopleHeader = () => {
+      doc.setFontSize(10);
+      doc.setTextColor(128, 0, 128);
+      doc.text('#', 20, yPosition);
+      doc.text('Name', 32, yPosition);
+      doc.text('Type', 150, yPosition);
+      doc.setDrawColor(128, 0, 128);
+      doc.line(20, yPosition + 3, 190, yPosition + 3);
       yPosition += 12;
-      
       doc.setTextColor(0, 0, 0);
-      const alcoholicNames = alcoholicPeopleList.map(person => person.name || 'Unnamed').join(', ');
-      const lines = doc.splitTextToSize(alcoholicNames, 80); // Narrower width for side-by-side
-      doc.text(lines, 20, yPosition);
-      yPosition += lines.length * 10;
-    }
-    
-    // Right column - Non-alcoholic people (reset yPosition to start at same level)
-    let rightYPosition = startYPosition;
-    if (nonAlcoholicPeopleList.length > 0) {
-      doc.setTextColor(0, 150, 0); // Green
-      doc.text('Non-Alcoholic People:', 110, rightYPosition);
-      rightYPosition += 12;
-      
+    };
+
+    drawPeopleHeader();
+
+    people.forEach((person, index) => {
+      if (yPosition > 260) {
+        doc.addPage();
+        yPosition = 30;
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text('PARTY PEOPLE (Continued)', 20, yPosition);
+        yPosition += 12;
+        drawPeopleHeader();
+      }
+
+      const personName = person.name || `Person ${index + 1}`;
+      const truncatedName = personName.length > 45 ? `${personName.substring(0, 42)}...` : personName;
+
+      doc.setFontSize(10);
       doc.setTextColor(0, 0, 0);
-      const nonAlcoholicNames = nonAlcoholicPeopleList.map(person => person.name || 'Unnamed').join(', ');
-      const lines = doc.splitTextToSize(nonAlcoholicNames, 80); // Narrower width for side-by-side
-      doc.text(lines, 110, rightYPosition);
-      rightYPosition += lines.length * 10;
-    }
-    
-    // Set yPosition to the maximum of both columns
-    yPosition = Math.max(yPosition, rightYPosition)
+      doc.text(String(index + 1), 20, yPosition);
+      doc.text(truncatedName, 32, yPosition);
+      doc.setTextColor(person.isAlcoholic ? 128 : 0, person.isAlcoholic ? 0 : 150, person.isAlcoholic ? 128 : 0);
+      doc.text(person.isAlcoholic ? 'Alcoholic' : 'Non-Alcoholic', 150, yPosition);
+      doc.setTextColor(0, 0, 0);
+      yPosition += 10;
+    });
     
     // Add total line
     yPosition += 10;
