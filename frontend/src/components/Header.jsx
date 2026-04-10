@@ -124,20 +124,6 @@ function Header({ darkMode, toggleDarkMode, isMobileMenuOpen, setIsMobileMenuOpe
               Split costs, track people, and keep the output polished enough to share without explaining the math twice.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2 pt-1">
-            {['Split items', 'Track drinkers', 'Export PDF'].map((label) => (
-              <span
-                key={label}
-                className={`rounded-full border px-3 py-1 text-xs font-medium ${
-                  darkMode
-                    ? 'border-white/10 bg-white/5 text-slate-300'
-                    : 'border-slate-200 bg-white/75 text-slate-600'
-                }`}
-              >
-                {label}
-              </span>
-            ))}
-          </div>
         </div>
 
         <div className="ml-auto hidden sm:block">

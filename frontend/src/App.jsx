@@ -380,11 +380,11 @@ function App() {
               <p className="font-display text-xl font-semibold tracking-tight sm:text-2xl">{selectedPartyName}</p>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
+            <div className="grid w-full grid-cols-2 gap-3 md:flex md:w-auto md:flex-nowrap md:items-center">
               <select
                 value={selectedPartyId ?? ''}
                 onChange={(event) => handleSelectParty(event.target.value)}
-                className={`min-w-[220px] rounded-2xl border px-4 py-3 text-sm font-medium shadow-sm outline-none ${
+                className={`col-span-2 min-w-0 rounded-2xl border px-4 py-3 text-sm font-medium shadow-sm outline-none md:min-w-[240px] ${
                   darkMode
                     ? 'border-white/10 bg-slate-900/70 text-slate-100'
                     : 'border-slate-200 bg-white/90 text-slate-800'
@@ -399,7 +399,7 @@ function App() {
 
               <button
                 onClick={handleCreateParty}
-                className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-transform duration-200 hover:-translate-y-0.5 hover:bg-slate-800"
+                className="col-span-2 h-11 whitespace-nowrap rounded-2xl bg-slate-950 px-4 text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-transform duration-200 hover:-translate-y-0.5 hover:bg-slate-800 md:col-span-1"
               >
                 + New Party
               </button>
@@ -407,7 +407,7 @@ function App() {
               <button
                 onClick={handleRenameParty}
                 disabled={!selectedPartyId}
-                className="rounded-2xl bg-amber-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-amber-500/20 transition-transform duration-200 hover:-translate-y-0.5 hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
+                className="h-11 whitespace-nowrap rounded-2xl bg-amber-500 px-4 text-sm font-semibold text-white shadow-lg shadow-amber-500/20 transition-transform duration-200 hover:-translate-y-0.5 hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Rename
               </button>
@@ -415,7 +415,7 @@ function App() {
               <button
                 onClick={handleDeleteParty}
                 disabled={!selectedPartyId}
-                className="rounded-2xl bg-rose-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-rose-500/20 transition-transform duration-200 hover:-translate-y-0.5 hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60"
+                className="h-11 whitespace-nowrap rounded-2xl bg-rose-500 px-4 text-sm font-semibold text-white shadow-lg shadow-rose-500/20 transition-transform duration-200 hover:-translate-y-0.5 hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Delete
               </button>
