@@ -30,6 +30,14 @@ const Footer = ({ darkMode = false }) => {
 
   const [currentTip, setCurrentTip] = useState(0)
 
+  const goToPreviousTip = () => {
+    setCurrentTip((prev) => (prev - 1 + partyTips.length) % partyTips.length)
+  }
+
+  const goToNextTip = () => {
+    setCurrentTip((prev) => (prev + 1) % partyTips.length)
+  }
+
   useEffect(() => {
     const tipTimer = setInterval(() => {
       setCurrentTip((prev) => (prev + 1) % partyTips.length)
@@ -71,17 +79,46 @@ const Footer = ({ darkMode = false }) => {
             </div>
           </div>
 
-          <div className="mt-2 flex gap-2">
-            {partyTips.map((_, index) => (
-              <span
-                key={index}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  index === currentTip
-                    ? (darkMode ? 'w-8 bg-cyan-300' : 'w-8 bg-cyan-600')
-                    : (darkMode ? 'w-3 bg-white/15' : 'w-3 bg-slate-300')
+          <div className="mt-2 flex items-center justify-between gap-3">
+            <div className="flex gap-2">
+              {partyTips.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentTip(index)}
+                  aria-label={`Go to tip ${index + 1}`}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    index === currentTip
+                      ? (darkMode ? 'w-8 bg-cyan-300' : 'w-8 bg-cyan-600')
+                      : (darkMode ? 'w-3 bg-white/15 hover:bg-white/30' : 'w-3 bg-slate-300 hover:bg-slate-400')
+                  }`}
+                />
+              ))}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={goToPreviousTip}
+                className={`rounded-xl border px-2.5 py-1 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 ${
+                  darkMode
+                    ? 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
+                    : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                 }`}
-              />
-            ))}
+                aria-label="Previous tip"
+              >
+                Prev
+              </button>
+              <button
+                onClick={goToNextTip}
+                className={`rounded-xl border px-2.5 py-1 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 ${
+                  darkMode
+                    ? 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10'
+                    : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                }`}
+                aria-label="Next tip"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
 
