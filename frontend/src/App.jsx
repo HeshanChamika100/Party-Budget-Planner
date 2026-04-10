@@ -377,7 +377,24 @@ function App() {
               <p className={`text-[11px] uppercase tracking-[0.28em] ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
               Active Party
               </p>
-              <p className="font-display text-xl font-semibold tracking-tight sm:text-2xl">{selectedPartyName}</p>
+              <div className="flex items-center gap-2">
+                <p className="font-display text-xl font-semibold tracking-tight sm:text-2xl">
+                  {selectedPartyName}
+                </p>
+                <button
+                  onClick={handleRenameParty}
+                  disabled={!selectedPartyId}
+                  className={`inline-flex h-9 w-9 items-center justify-center rounded-full border text-sm shadow-sm transition-all duration-200 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50 ${
+                    darkMode
+                      ? 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10'
+                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                  }`}
+                  title="Rename party"
+                  aria-label="Rename party"
+                >
+                  <span className="leading-none">✎</span>
+                </button>
+              </div>
             </div>
 
             <div className="grid w-full grid-cols-2 gap-3 md:flex md:w-auto md:flex-nowrap md:items-center">
@@ -402,14 +419,6 @@ function App() {
                 className="col-span-2 h-11 whitespace-nowrap rounded-2xl bg-slate-950 px-4 text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-transform duration-200 hover:-translate-y-0.5 hover:bg-slate-800 md:col-span-1"
               >
                 + New Party
-              </button>
-
-              <button
-                onClick={handleRenameParty}
-                disabled={!selectedPartyId}
-                className="h-11 whitespace-nowrap rounded-2xl bg-amber-500 px-4 text-sm font-semibold text-white shadow-lg shadow-amber-500/20 transition-transform duration-200 hover:-translate-y-0.5 hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Rename
               </button>
 
               <button
