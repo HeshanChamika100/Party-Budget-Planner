@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 /**
  * Custom hook to manage local state with unsaved changes tracking.
@@ -11,21 +12,12 @@ export function useLocalChanges(items, people, {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Sync remote items into local state when loaded.
+  // Sync selected party data into local editable state.
   useEffect(() => {
-    if (items.length > 0 && localItems.length === 0) {
-      setLocalItems(items);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items]);
-
-  // Sync remote people into local state when loaded.
-  useEffect(() => {
-    if (people.length > 0 && localPeople.length === 0) {
-      setLocalPeople(people);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [people]);
+    setLocalItems(items);
+    setLocalPeople(people);
+    setHasUnsavedChanges(false);
+  }, [items, people]);
 
   // Item handlers
   const handleChange = (index, field, value) => {
@@ -57,6 +49,30 @@ export function useLocalChanges(items, people, {
     setHasUnsavedChanges(true);
   };
 
+  const handleReorderItems = (fromIndex, toIndex) => {
+    if (fromIndex === toIndex) {
+      return;
+    }
+
+    setLocalItems((currentItems) => {
+      if (
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= currentItems.length ||
+        toIndex >= currentItems.length
+      ) {
+        return currentItems;
+      }
+
+      const nextItems = [...currentItems];
+      const [movedItem] = nextItems.splice(fromIndex, 1);
+      nextItems.splice(toIndex, 0, movedItem);
+      return nextItems;
+    });
+
+    setHasUnsavedChanges(true);
+  };
+
   // People handlers
   const handlePersonChange = (index, field, value) => {
     setLocalPeople((currentPeople) => {
@@ -85,6 +101,30 @@ export function useLocalChanges(items, people, {
     setHasUnsavedChanges(true);
   };
 
+  const handleReorderPeople = (fromIndex, toIndex) => {
+    if (fromIndex === toIndex) {
+      return;
+    }
+
+    setLocalPeople((currentPeople) => {
+      if (
+        fromIndex < 0 ||
+        toIndex < 0 ||
+        fromIndex >= currentPeople.length ||
+        toIndex >= currentPeople.length
+      ) {
+        return currentPeople;
+      }
+
+      const nextPeople = [...currentPeople];
+      const [movedPerson] = nextPeople.splice(fromIndex, 1);
+      nextPeople.splice(toIndex, 0, movedPerson);
+      return nextPeople;
+    });
+
+    setHasUnsavedChanges(true);
+  };
+
   // Save all changes to Firebase.
   const handleSaveChanges = async () => {
     setIsSaving(true);
@@ -93,10 +133,10 @@ export function useLocalChanges(items, people, {
       setLocalItems(savedState.items);
       setLocalPeople(savedState.people);
       setHasUnsavedChanges(false);
-      alert('✅ Changes saved successfully!');
+      toast.success('Changes saved successfully.');
     } catch (error) {
       console.error('Error saving changes:', error);
-      alert('❌ Failed to save changes. Please try again.');
+      toast.error('Failed to save changes. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -108,6 +148,7 @@ export function useLocalChanges(items, people, {
       setLocalItems(items);
       setLocalPeople(people);
       setHasUnsavedChanges(false);
+      toast('Changes discarded.');
     }
   };
 
@@ -119,9 +160,11 @@ export function useLocalChanges(items, people, {
     handleChange,
     handleAddItem,
     handleRemoveItem,
+    handleReorderItems,
     handlePersonChange,
     handleAddPerson,
     handleRemovePerson,
+    handleReorderPeople,
     handleSaveChanges,
     handleDiscardChanges,
   };

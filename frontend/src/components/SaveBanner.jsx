@@ -4,47 +4,51 @@ function SaveBanner({ hasUnsavedChanges, isSaving, onSave, onDiscard, darkMode }
   if (!hasUnsavedChanges) return null;
 
   return (
-    <div className={`fixed top-0 left-0 right-0 z-50 p-4 shadow-lg border-b-4 animate-slide-down ${
+    <div className={`fixed left-1/2 top-4 z-50 w-[calc(100%-1rem)] max-w-6xl -translate-x-1/2 rounded-3xl border px-4 py-4 shadow-2xl backdrop-blur-xl animate-slide-down ${
       darkMode 
-        ? 'bg-yellow-900/95 border-yellow-500 backdrop-blur-sm' 
-        : 'bg-yellow-50/95 border-yellow-400 backdrop-blur-sm'
+        ? 'border-amber-400/20 bg-slate-950/90' 
+        : 'border-amber-200 bg-white/90'
     }`}>
-      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between space-y-3 sm:space-y-0">
-        <div className="flex items-center space-x-3">
-          <span className="text-2xl">⚠️</span>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-lg ${
+            darkMode ? 'bg-amber-400/10 text-amber-300' : 'bg-amber-100 text-amber-700'
+          }`}>
+            •
+          </div>
           <div>
-            <p className={`font-bold text-base ${
-              darkMode ? 'text-yellow-200' : 'text-yellow-800'
+            <p className={`font-display text-sm font-bold uppercase tracking-[0.22em] ${
+              darkMode ? 'text-amber-200' : 'text-amber-700'
             }`}>
-              You have unsaved changes
+              Unsaved edits
             </p>
-            <p className={`text-sm ${
-              darkMode ? 'text-yellow-300' : 'text-yellow-700'
+            <p className={`mt-1 text-sm ${
+              darkMode ? 'text-slate-300' : 'text-slate-600'
             }`}>
-              Don't forget to save your changes.
+              Save now or discard the current working state before switching context.
             </p>
           </div>
         </div>
-        <div className="flex space-x-3">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={onDiscard}
             disabled={isSaving}
-            className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
+            className={`rounded-2xl px-4 py-2.5 text-sm font-semibold transition-all duration-200 ${
               darkMode 
-                ? 'bg-gray-700 text-white hover:bg-gray-600' 
-                : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-            } ${isSaving ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
+                ? 'bg-white/5 text-slate-100 hover:bg-white/10' 
+                : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            } ${isSaving ? 'cursor-not-allowed opacity-50' : 'hover:-translate-y-0.5'}`}
           >
-            🚫 Discard
+            Discard
           </button>
           <button
             onClick={onSave}
             disabled={isSaving}
-            className={`px-6 py-2 rounded-lg font-semibold transition-all duration-200 flex items-center space-x-2 ${
+            className={`flex items-center gap-2 rounded-2xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 ${
               isSaving 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-green-500 hover:bg-green-600 hover:scale-105'
-            } text-white shadow-lg`}
+                ? 'cursor-not-allowed bg-slate-400 text-white' 
+                : 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:-translate-y-0.5 hover:bg-emerald-600'
+            }`}
           >
             {isSaving ? (
               <>
@@ -53,7 +57,7 @@ function SaveBanner({ hasUnsavedChanges, isSaving, onSave, onDiscard, darkMode }
               </>
             ) : (
               <>
-                <span>💾</span>
+                <span>✓</span>
                 <span>Save Changes</span>
               </>
             )}

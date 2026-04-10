@@ -4,6 +4,7 @@ import PDFGenerator from './PDFGenerator';
 function BudgetSummary({
   localItems,
   localPeople,
+  partyName,
   totalPeople,
   alcoholicPeople,
   nonAlcoholicPeople,
@@ -15,21 +16,33 @@ function BudgetSummary({
   darkMode
 }) {
   return (
-    <div className={`p-4 sm:p-6 lg:p-8 rounded-2xl border transition-all duration-300 ${
+    <div className={`rounded-[1.75rem] border p-4 transition-all duration-300 sm:p-6 lg:p-8 ${
       darkMode 
-        ? 'bg-gradient-to-r from-green-900/30 to-blue-900/30 border-green-400/30' 
-        : 'bg-gradient-to-r from-green-50 to-blue-50 border-green-200'
+        ? 'border-emerald-400/15 bg-gradient-to-br from-emerald-950/30 via-slate-950/50 to-cyan-950/30' 
+        : 'border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-cyan-50'
     }`}>
-      <h2 className={`text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6 flex items-center ${
-        darkMode ? 'text-white' : 'text-gray-800'
-      }`}>
-        <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-sm sm:text-lg mr-3 sm:mr-4 shadow-lg">
-          3
-        </span>
-        Budget Summary
-      </h2>
+      <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-950 text-sm font-bold text-white shadow-lg shadow-slate-950/20">
+            3
+          </span>
+          <div>
+            <p className={`text-[11px] uppercase tracking-[0.28em] ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+              Step 3
+            </p>
+            <h2 className={`font-display text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl ${
+              darkMode ? 'text-white' : 'text-slate-900'
+            }`}>
+              Budget Summary
+            </h2>
+          </div>
+        </div>
+        <p className={`max-w-2xl text-sm leading-relaxed ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+          A compact view of the total spend, drinker split, and the number of people in the room.
+        </p>
+      </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-6">
         <SummaryCard
           icon="💰"
           label="Total Cost"
@@ -67,6 +80,7 @@ function BudgetSummary({
 
       {/* PDF Generation Component */}
       <PDFGenerator 
+        partyName={partyName}
         items={localItems}
         people={localPeople}
         alcoholicPeople={alcoholicPeople}
@@ -85,31 +99,31 @@ function BudgetSummary({
 // Summary Card Component
 function SummaryCard({ icon, label, value, subValue, darkMode, color }) {
   const colorClasses = {
-    purple: darkMode ? 'text-purple-400' : 'text-purple-600',
-    green: darkMode ? 'text-green-400' : 'text-green-600',
-    blue: darkMode ? 'text-blue-400' : 'text-blue-600',
+    purple: darkMode ? 'text-fuchsia-300' : 'text-fuchsia-700',
+    green: darkMode ? 'text-emerald-300' : 'text-emerald-700',
+    blue: darkMode ? 'text-sky-300' : 'text-sky-700',
   };
 
   return (
-    <div className={`p-3 sm:p-6 rounded-2xl shadow-lg border transition-all duration-300 ${
+    <div className={`rounded-[1.5rem] border p-4 shadow-[0_16px_60px_-40px_rgba(15,23,42,0.5)] transition-all duration-300 sm:p-6 ${
       darkMode 
-        ? 'bg-gray-700 border-gray-600' 
-        : 'bg-white border-gray-100'
+        ? 'border-white/10 bg-white/5' 
+        : 'border-white/70 bg-white/85'
     }`}>
-      <div className="flex items-start justify-between sm:flex-col sm:items-center sm:space-y-2">
-        <div className="flex items-center space-x-2 sm:space-x-3">
+      <div className="flex items-start justify-between gap-4 sm:flex-col sm:items-start sm:gap-3">
+        <div className="flex items-center gap-3">
           <span className="text-xl sm:text-2xl lg:text-3xl">{icon}</span>
-          <span className={`text-sm sm:text-base lg:text-lg font-semibold ${
-            darkMode ? 'text-gray-300' : 'text-gray-600'
+          <span className={`text-sm font-semibold sm:text-base lg:text-lg ${
+            darkMode ? 'text-slate-300' : 'text-slate-600'
           }`}>{label}</span>
         </div>
-        <div className="text-right sm:text-center">
+        <div className="text-right sm:text-left">
           <p className={`text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold ${colorClasses[color]}`}>
             {value}
           </p>
           {subValue && (
             <p className={`text-xs sm:text-sm mt-1 ${
-              darkMode ? 'text-gray-400' : 'text-gray-500'
+              darkMode ? 'text-slate-400' : 'text-slate-500'
             }`}>
               {subValue}
             </p>

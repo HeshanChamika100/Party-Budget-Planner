@@ -3,6 +3,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 const PDFGenerator = ({ 
+  partyName = 'Party',
   items, 
   people = [],
   alcoholicPeople, 
@@ -15,11 +16,31 @@ const PDFGenerator = ({
   darkMode = false
 }) => {
   const totalPeople = alcoholicPeople + nonAlcoholicPeople;
+  const safePartyName = partyName.trim() || 'Party';
+  const fileSafePartyName = safePartyName.replace(/[^a-zA-Z0-9-_ ]/g, '').replace(/\s+/g, '-');
 
   // JPG Generation Function
   const generateJPGReport = async () => {
     const currentDate = new Date().toLocaleDateString();
     const currentTime = new Date().toLocaleTimeString();
+    const summarizePeople = (partyPeople, isAlcoholicGroup, maxNames = 8) => {
+      const names = partyPeople
+        .filter((person) => Boolean(person.isAlcoholic) === isAlcoholicGroup)
+        .map((person, index) => person.name?.trim() || `Person ${index + 1}`);
+
+      if (names.length === 0) {
+        return 'None';
+      }
+
+      if (names.length <= maxNames) {
+        return names.join(', ');
+      }
+
+      return `${names.slice(0, maxNames).join(', ')} +${names.length - maxNames} more`;
+    };
+
+    const alcoholicSummary = summarizePeople(people, true);
+    const nonAlcoholicSummary = summarizePeople(people, false);
 
     // Create a temporary div for the report
     const reportElement = document.createElement('div');
@@ -38,6 +59,9 @@ const PDFGenerator = ({
         <h1 style="color: #7c3aed; font-size: 28px; margin: 0 0 10px 0; font-weight: bold;">
           🎉 PARTY BUDGET REPORT
         </h1>
+        <p style="color: #7c3aed; font-size: 16px; margin: 0 0 8px 0; font-weight: 600;">
+          ${safePartyName}
+        </p>
         <p style="color: #666; font-size: 14px; margin: 0;">
           Generated on: ${currentDate} at ${currentTime}
         </p>
@@ -144,39 +168,23 @@ const PDFGenerator = ({
           👥 PARTY PEOPLE
         </h2>
         <div style="background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-            ${(() => {
-              const alcoholicPeopleList = people.filter(person => person.isAlcoholic);
-              const nonAlcoholicPeopleList = people.filter(person => !person.isAlcoholic);
-              
-              let leftColumn = '';
-              let rightColumn = '';
-              
-              if (alcoholicPeopleList.length > 0) {
-                leftColumn = `
-                  <div>
-                    <div style="color: #7c3aed; font-weight: bold; font-size: 14px; margin-bottom: 8px;">🍺 Alcoholic People:</div>
-                    <div style="color: #333; font-size: 13px; line-height: 1.5;">${alcoholicPeopleList.map(person => person.name || 'Unnamed').join(', ')}</div>
-                  </div>
-                `;
-              } else {
-                leftColumn = '<div style="color: #666; font-style: italic;">No alcoholic people</div>';
-              }
-              
-              if (nonAlcoholicPeopleList.length > 0) {
-                rightColumn = `
-                  <div>
-                    <div style="color: #059669; font-weight: bold; font-size: 14px; margin-bottom: 8px;">🥤 Non-Alcoholic People:</div>
-                    <div style="color: #333; font-size: 13px; line-height: 1.5;">${nonAlcoholicPeopleList.map(person => person.name || 'Unnamed').join(', ')}</div>
-                  </div>
-                `;
-              } else {
-                rightColumn = '<div style="color: #666; font-style: italic;">No non-alcoholic people</div>';
-              }
-              
-              return leftColumn + rightColumn;
-            })()
-            }
+          <div style="background: white; border-radius: 10px; border: 1px solid #e2e8f0; padding: 16px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+            <div>
+              <div style="color: #7c3aed; font-size: 15px; font-weight: 700; margin-bottom: 8px;">
+                🍺 Alcoholic People:
+              </div>
+              <div style="color: #374151; font-size: 14px; line-height: 1.5;">
+                ${alcoholicSummary}
+              </div>
+            </div>
+            <div>
+              <div style="color: #059669; font-size: 15px; font-weight: 700; margin-bottom: 8px;">
+                🥤 Non-Alcoholic People:
+              </div>
+              <div style="color: #374151; font-size: 14px; line-height: 1.5;">
+                ${nonAlcoholicSummary}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -185,14 +193,6 @@ const PDFGenerator = ({
         <div style="text-align: center;">
           <div style="font-size: 20px; font-weight: bold; color: #059669; margin-bottom: 20px;">
             GRAND TOTAL: Rs.${totalCost.toLocaleString()}
-          </div>
-        </div>
-        
-        <div style="background: #f1f5f9; padding: 20px; border-radius: 10px; margin-top: 20px;">
-          <h3 style="color: #475569; font-size: 14px; margin-bottom: 15px; font-weight: bold;">ADDITIONAL INFORMATION:</h3>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 13px; color: #64748b;">
-            <div>• Alcoholic people: <strong>${alcoholicPeople}</strong> (Cost per person: <strong>Rs.${alcoholicPeople > 0 ? alcoholicCostPerPerson.toLocaleString() : '0'}</strong>)</div>
-            <div>• Non-alcoholic people: <strong>${nonAlcoholicPeople}</strong> (Cost per person: <strong>Rs.${nonAlcoholicPeople > 0 ? nonAlcoholicCostPerPerson.toLocaleString() : '0'}</strong>)</div>
           </div>
         </div>
         
@@ -216,7 +216,7 @@ const PDFGenerator = ({
 
       // Convert canvas to JPG and download
       const link = document.createElement('a');
-      link.download = `Party-Budget-Report-${currentDate.replace(/\//g, '-')}.jpg`;
+      link.download = `${fileSafePartyName}-Budget-Report-${currentDate.replace(/\//g, '-')}.jpg`;
       link.href = canvas.toDataURL('image/jpeg', 0.9);
       link.click();
 
@@ -238,14 +238,18 @@ const PDFGenerator = ({
     doc.setTextColor(128, 0, 128); // Purple color
     doc.text('PARTY BUDGET REPORT', 20, 30);
 
+    doc.setFontSize(13);
+    doc.setTextColor(128, 0, 128);
+    doc.text(safePartyName, 20, 38);
+
     // Add date and time
     doc.setFontSize(12);
     doc.setTextColor(100, 100, 100);
-    doc.text(`Generated on: ${currentDate} at ${currentTime}`, 20, 45);
+    doc.text(`Generated on: ${currentDate} at ${currentTime}`, 20, 48);
 
     // Add separator line
     doc.setDrawColor(200, 200, 200);
-    doc.line(20, 50, 190, 50);
+    doc.line(20, 53, 190, 53);
 
     // Summary section - more compact
     doc.setFontSize(14);
@@ -381,7 +385,7 @@ const PDFGenerator = ({
       yPosition += 12;
     });
 
-    // Add people section - side by side format
+    // Add people section
     yPosition += 20;
     
     // Check if we need a new page for people section
@@ -393,44 +397,45 @@ const PDFGenerator = ({
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0);
     doc.text('PARTY PEOPLE', 20, yPosition);
-    yPosition += 15;
-    
-    // Group people by alcoholic preference
-    const alcoholicPeopleList = people.filter(person => person.isAlcoholic);
-    const nonAlcoholicPeopleList = people.filter(person => !person.isAlcoholic);
-    
-    doc.setFontSize(10);
-    const startYPosition = yPosition;
-    
-    // Left column - Alcoholic people
-    if (alcoholicPeopleList.length > 0) {
-      doc.setTextColor(128, 0, 128); // Purple
-      doc.text('Alcoholic People:', 20, yPosition);
+    yPosition += 12;
+
+    const drawPeopleHeader = () => {
+      doc.setFontSize(10);
+      doc.setTextColor(128, 0, 128);
+      doc.text('#', 20, yPosition);
+      doc.text('Name', 32, yPosition);
+      doc.text('Type', 150, yPosition);
+      doc.setDrawColor(128, 0, 128);
+      doc.line(20, yPosition + 3, 190, yPosition + 3);
       yPosition += 12;
-      
       doc.setTextColor(0, 0, 0);
-      const alcoholicNames = alcoholicPeopleList.map(person => person.name || 'Unnamed').join(', ');
-      const lines = doc.splitTextToSize(alcoholicNames, 80); // Narrower width for side-by-side
-      doc.text(lines, 20, yPosition);
-      yPosition += lines.length * 10;
-    }
-    
-    // Right column - Non-alcoholic people (reset yPosition to start at same level)
-    let rightYPosition = startYPosition;
-    if (nonAlcoholicPeopleList.length > 0) {
-      doc.setTextColor(0, 150, 0); // Green
-      doc.text('Non-Alcoholic People:', 110, rightYPosition);
-      rightYPosition += 12;
-      
+    };
+
+    drawPeopleHeader();
+
+    people.forEach((person, index) => {
+      if (yPosition > 260) {
+        doc.addPage();
+        yPosition = 30;
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text('PARTY PEOPLE (Continued)', 20, yPosition);
+        yPosition += 12;
+        drawPeopleHeader();
+      }
+
+      const personName = person.name || `Person ${index + 1}`;
+      const truncatedName = personName.length > 45 ? `${personName.substring(0, 42)}...` : personName;
+
+      doc.setFontSize(10);
       doc.setTextColor(0, 0, 0);
-      const nonAlcoholicNames = nonAlcoholicPeopleList.map(person => person.name || 'Unnamed').join(', ');
-      const lines = doc.splitTextToSize(nonAlcoholicNames, 80); // Narrower width for side-by-side
-      doc.text(lines, 110, rightYPosition);
-      rightYPosition += lines.length * 10;
-    }
-    
-    // Set yPosition to the maximum of both columns
-    yPosition = Math.max(yPosition, rightYPosition)
+      doc.text(String(index + 1), 20, yPosition);
+      doc.text(truncatedName, 32, yPosition);
+      doc.setTextColor(person.isAlcoholic ? 128 : 0, person.isAlcoholic ? 0 : 150, person.isAlcoholic ? 128 : 0);
+      doc.text(person.isAlcoholic ? 'Alcoholic' : 'Non-Alcoholic', 150, yPosition);
+      doc.setTextColor(0, 0, 0);
+      yPosition += 10;
+    });
     
     // Add total line
     yPosition += 10;
@@ -482,7 +487,7 @@ const PDFGenerator = ({
 
     // Save the PDF with a clean filename
     const cleanDate = currentDate.replace(/\//g, '-').replace(/\\/g, '-');
-    doc.save(`Party-Budget-Report-${cleanDate}.pdf`);
+    doc.save(`${fileSafePartyName}-Budget-Report-${cleanDate}.pdf`);
   };
 
   return (
