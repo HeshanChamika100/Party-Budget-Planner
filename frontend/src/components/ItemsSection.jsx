@@ -148,10 +148,10 @@ function ItemCardMobile({
           </button>
           <button
             onClick={() => handleRemoveItem(index)}
-            className="rounded-full bg-rose-500 p-2 text-white shadow-lg shadow-rose-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-600"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg shadow-rose-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-600"
             title="Remove item"
           >
-            🗑️
+            <TrashIcon className="h-5 w-5" />
           </button>
         </div>
       </div>
@@ -373,10 +373,10 @@ function ItemsTable({
               <td className="p-3 lg:p-4 text-center">
                 <button
                   onClick={() => handleRemoveItem(index)}
-                  className="bg-gradient-to-r from-red-500 to-red-600 text-white p-2 lg:p-3 rounded-full hover:from-red-600 hover:to-red-700 transform hover:scale-110 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-rose-500 text-white shadow-lg shadow-rose-500/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-600 lg:h-11 lg:w-11"
                   title="Remove item"
                 >
-                  🗑️
+                  <TrashIcon className="h-5 w-5 lg:h-[1.15rem] lg:w-[1.15rem]" />
                 </button>
               </td>
             </tr>
@@ -385,6 +385,27 @@ function ItemsTable({
         </tbody>
       </table>
     </div>
+  );
+}
+
+function TrashIcon({ className = 'h-5 w-5' }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={className}
+    >
+      <path d="M3 6h18" />
+      <path d="M8 6V4h8v2" />
+      <path d="M19 6l-1 14H6L5 6" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+    </svg>
   );
 }
 
