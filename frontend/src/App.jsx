@@ -52,6 +52,9 @@ function App() {
 
   const selectedParty = parties.find((party) => party._id === selectedPartyId) ?? null;
   const selectedPartyName = selectedParty?.name ?? 'My Party';
+  const shellClass = darkMode
+    ? 'bg-[#040816] text-slate-100'
+    : 'bg-[#f7f2ec] text-slate-900';
 
   // Budget calculations (using local state)
   const totalPeople = localPeople.length;
@@ -195,12 +198,12 @@ function App() {
 
   if (error) {
     return (
-      <div className={`min-h-screen transition-all duration-300 p-2 sm:p-4 ${
-        darkMode 
-          ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-black' 
-          : 'bg-gradient-to-br from-purple-400 via-pink-500 to-red-500'
-      }`}>
-        <div className="max-w-6xl mx-auto pt-20">
+      <div className={`relative min-h-screen overflow-hidden transition-all duration-300 ${shellClass}`}>
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className={`absolute -top-32 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full blur-3xl ${darkMode ? 'bg-fuchsia-500/15' : 'bg-rose-300/35'}`} />
+          <div className={`absolute right-[-6rem] top-40 h-96 w-96 rounded-full blur-3xl ${darkMode ? 'bg-cyan-500/10' : 'bg-amber-300/25'}`} />
+        </div>
+        <div className="relative mx-auto max-w-6xl px-3 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
           <ErrorMessage 
             error={error} 
             onRetry={refresh}
@@ -212,12 +215,14 @@ function App() {
   }
 
   return (
-    <div className={`min-h-screen transition-all duration-300 p-2 sm:p-4 ${
-      darkMode 
-        ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-black' 
-        : 'bg-gradient-to-br from-purple-400 via-pink-500 to-red-500'
-    }`}>
-      <div className="max-w-6xl mx-auto">
+    <div className={`relative min-h-screen overflow-hidden transition-all duration-300 ${shellClass}`}>
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className={`absolute -top-32 left-1/2 h-[24rem] w-[24rem] -translate-x-1/2 rounded-full blur-3xl ${darkMode ? 'bg-fuchsia-500/12' : 'bg-rose-300/35'}`} />
+        <div className={`absolute right-[-7rem] top-44 h-[28rem] w-[28rem] rounded-full blur-3xl ${darkMode ? 'bg-cyan-500/10' : 'bg-amber-300/20'}`} />
+        <div className={`absolute bottom-0 left-0 h-64 w-64 rounded-full blur-3xl ${darkMode ? 'bg-violet-500/10' : 'bg-orange-200/25'}`} />
+      </div>
+
+      <div className="relative mx-auto max-w-7xl px-3 py-4 sm:px-5 sm:py-6 lg:px-8 lg:py-8">
         {/* Unsaved Changes Banner */}
         <SaveBanner
           hasUnsavedChanges={hasUnsavedChanges}
@@ -236,65 +241,67 @@ function App() {
           hasUnsavedChanges={hasUnsavedChanges}
         />
 
-        <div className={`mb-4 sm:mb-6 p-4 rounded-2xl backdrop-blur-sm border flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between ${
+        <div className={`mb-4 sm:mb-6 rounded-3xl border backdrop-blur-xl shadow-[0_24px_80px_-48px_rgba(15,23,42,0.55)] ${
           darkMode
-            ? 'bg-gray-800/95 border-gray-600/20 text-white'
-            : 'bg-white/95 border-white/20 text-gray-800'
+            ? 'border-white/10 bg-slate-950/78 text-slate-100'
+            : 'border-white/70 bg-white/75 text-slate-900'
         }`}>
-          <div>
-            <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+          <div className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between lg:p-6">
+            <div className="space-y-1">
+              <p className={`text-[11px] uppercase tracking-[0.28em] ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
               Active Party
-            </p>
-            <p className="font-bold text-lg">{selectedPartyName}</p>
-          </div>
+              </p>
+              <p className="font-display text-xl font-semibold tracking-tight sm:text-2xl">{selectedPartyName}</p>
+            </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center w-full sm:w-auto">
-            <select
-              value={selectedPartyId ?? ''}
-              onChange={(event) => handleSelectParty(event.target.value)}
-              className={`px-4 py-2 rounded-xl border-2 min-w-[220px] ${
-                darkMode
-                  ? 'bg-gray-700 border-gray-600 text-white'
-                  : 'bg-white border-gray-200 text-gray-800'
-              }`}
-            >
-              {parties.map((party) => (
-                <option key={party._id} value={party._id}>
-                  {party.name}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
+              <select
+                value={selectedPartyId ?? ''}
+                onChange={(event) => handleSelectParty(event.target.value)}
+                className={`min-w-[220px] rounded-2xl border px-4 py-3 text-sm font-medium shadow-sm outline-none ${
+                  darkMode
+                    ? 'border-white/10 bg-slate-900/70 text-slate-100'
+                    : 'border-slate-200 bg-white/90 text-slate-800'
+                }`}
+              >
+                {parties.map((party) => (
+                  <option key={party._id} value={party._id}>
+                    {party.name}
+                  </option>
+                ))}
+              </select>
 
-            <button
-              onClick={handleCreateParty}
-              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-4 py-2 rounded-xl font-semibold transition-all duration-200"
-            >
-              + New Party
-            </button>
+              <button
+                onClick={handleCreateParty}
+                className="rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-transform duration-200 hover:-translate-y-0.5 hover:bg-slate-800"
+              >
+                + New Party
+              </button>
 
-            <button
-              onClick={handleRenameParty}
-              disabled={!selectedPartyId}
-              className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white px-4 py-2 rounded-xl font-semibold transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              Rename
-            </button>
+              <button
+                onClick={handleRenameParty}
+                disabled={!selectedPartyId}
+                className="rounded-2xl bg-amber-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-amber-500/20 transition-transform duration-200 hover:-translate-y-0.5 hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Rename
+              </button>
 
-            <button
-              onClick={handleDeleteParty}
-              disabled={!selectedPartyId}
-              className="bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white px-4 py-2 rounded-xl font-semibold transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              Delete
-            </button>
+              <button
+                onClick={handleDeleteParty}
+                disabled={!selectedPartyId}
+                className="rounded-2xl bg-rose-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-rose-500/20 transition-transform duration-200 hover:-translate-y-0.5 hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Main Container */}
-        <div className={`backdrop-blur-sm shadow-2xl rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-8 transition-all duration-300 ${
+        <div className={`rounded-[2rem] border p-4 shadow-[0_30px_120px_-48px_rgba(15,23,42,0.6)] backdrop-blur-xl sm:p-6 lg:p-8 transition-all duration-300 ${
           darkMode 
-            ? 'bg-gray-800/95 border border-gray-600/20 text-white' 
-            : 'bg-white/95 border border-white/20 text-gray-800'
+            ? 'border-white/10 bg-slate-950/82 text-slate-100' 
+            : 'border-white/70 bg-[#fffaf4]/88 text-slate-900'
         }`}>
           {/* Items Section */}
           <ItemsSection

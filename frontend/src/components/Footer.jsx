@@ -2,23 +2,16 @@ import React, { useState, useEffect } from 'react'
 
 const Footer = ({ darkMode = false }) => {
   const [currentTime, setCurrentTime] = useState(new Date())
-  const [partyEmojis] = useState(['🎉', '🎊', '🎈', '🎂', '🥳', '🎁', '🎭', '🎪', '🎨', '🎵', '💃', '🕺'])
-  const [currentEmojiIndex, setCurrentEmojiIndex] = useState(0)
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date())
     }, 1000)
 
-    const emojiTimer = setInterval(() => {
-      setCurrentEmojiIndex((prev) => (prev + 1) % partyEmojis.length)
-    }, 2000)
-
     return () => {
       clearInterval(timer)
-      clearInterval(emojiTimer)
     }
-  }, [partyEmojis.length])
+  }, [])
 
   const socialLinks = [
     { icon: '💼', label: 'LinkedIn', url: '#' },
@@ -46,152 +39,77 @@ const Footer = ({ darkMode = false }) => {
   }, [partyTips.length])
 
   return (
-    <footer className="mt-8 sm:mt-12">
-      {/* Animated Divider */}
-      <div className="flex items-center justify-center mb-8">
-        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
-        <div className="mx-4 text-2xl animate-bounce">
-          {partyEmojis[currentEmojiIndex]}
-        </div>
-        <div className="flex-1 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
-      </div>
-
-      {/* Party Tips Section */}
-      <div className={`backdrop-blur-sm rounded-2xl p-4 sm:p-6 mb-6 border transition-all duration-300 ${
-        darkMode 
-          ? 'bg-gray-800/80 border-gray-600/30' 
-          : 'bg-white/10 border-white/20'
-      }`}>
-        <div className="text-center">
-          <h3 className="text-lg sm:text-xl font-bold text-white mb-3 flex items-center justify-center">
-            <span className="mr-2 text-2xl animate-pulse">💡</span>
-            Party Planning Tips
-          </h3>
-          <div className="relative h-12 sm:h-16 flex items-center justify-center">
-            <p 
-              key={currentTip}
-              className="text-white/90 text-sm sm:text-base font-medium px-4 animate-slideIn text-center leading-relaxed"
-            >
-              {partyTips[currentTip]}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Footer Content */}
-      <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 sm:p-8 border border-white/20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
-          
-          {/* Left Section - Branding */}
-          <div className="space-y-3">
-            <h3 className="text-xl sm:text-2xl font-bold text-white flex items-center justify-center md:justify-start">
-              <span className="mr-2 text-2xl animate-sparkle">🎉</span>
-              Party Planner
-            </h3>
-            <p className="text-white/80 text-sm leading-relaxed">
-              Making your celebrations memorable, one budget at a time!
-            </p>
-            <div className="flex items-center justify-center md:justify-start space-x-2 text-white/70">
-              <span className="text-sm">Built with</span>
-              <span className="text-red-400 animate-pulse">❤️</span>
-              <span className="text-sm">& lots of</span>
-              <span className="text-yellow-400 animate-bounce">☕</span>
+    <footer className="mt-8 pb-4 sm:mt-12">
+      <div className={`grid gap-4 lg:grid-cols-[1.4fr_1fr] ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>
+        <div className={`rounded-[1.75rem] border p-5 shadow-[0_18px_60px_-42px_rgba(15,23,42,0.45)] backdrop-blur-xl ${
+          darkMode ? 'border-white/10 bg-white/5' : 'border-white/70 bg-white/70'
+        }`}>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className={`text-[11px] uppercase tracking-[0.28em] ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                Planning note
+              </p>
+              <p className={`mt-2 max-w-xl text-sm leading-relaxed sm:text-base ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+                {partyTips[currentTip]}
+              </p>
+            </div>
+            <div className={`hidden rounded-2xl px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] sm:block ${
+              darkMode ? 'bg-white/5 text-slate-400' : 'bg-slate-100 text-slate-500'
+            }`}>
+              {currentTime.toLocaleDateString()}
             </div>
           </div>
+        </div>
 
-          {/* Center Section - Developer Info */}
-          <div className="space-y-4">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mb-3 shadow-lg">
-                <span className="text-2xl font-bold text-white">H</span>
-              </div>
-              <h4 className="text-lg font-bold text-white">Developed by Heshan</h4>
-              <p className="text-white/70 text-sm">Full Stack Developer</p>
+        <div className={`rounded-[1.75rem] border p-5 shadow-[0_18px_60px_-42px_rgba(15,23,42,0.45)] backdrop-blur-xl ${
+          darkMode ? 'border-white/10 bg-slate-950/65' : 'border-white/70 bg-white/70'
+        }`}>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className={`text-[11px] uppercase tracking-[0.28em] ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                Built by
+              </p>
+              <p className={`mt-2 font-display text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-950'}`}>
+                Heshan Chamika
+              </p>
+              <p className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                Full stack developer
+              </p>
             </div>
-            
-            {/* Social Links */}
-            <div className="flex justify-center space-x-3">
-              {socialLinks.map((link, index) => (
+
+            <div className="flex items-center gap-2">
+              {socialLinks.map((link) => (
                 <a
-                  key={index}
+                  key={link.label}
                   href={link.url}
-                  className="group relative"
+                  className={`flex h-10 w-10 items-center justify-center rounded-full border text-lg transition-all duration-200 hover:-translate-y-0.5 ${
+                    darkMode
+                      ? 'border-white/10 bg-white/5 text-white hover:bg-white/10'
+                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                  }`}
                   title={link.label}
                 >
-                  <div className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-12">
-                    <span className="text-lg">{link.icon}</span>
-                  </div>
-                  <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 text-xs text-white/80 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    {link.label}
-                  </div>
+                  <span>{link.icon}</span>
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Right Section - Stats & Time */}
-          <div className="space-y-4">
-            <div className="text-center">
-              <h4 className="text-lg font-bold text-white mb-3">✨ Live Stats</h4>
-              <div className="space-y-2">
-                <div className="bg-white/10 rounded-lg p-2">
-                  <p className="text-xs text-white/70">Current Time</p>
-                  <p className="text-sm font-mono text-white">
-                    {currentTime.toLocaleTimeString()}
-                  </p>
-                </div>
-                <div className="bg-white/10 rounded-lg p-2">
-                  <p className="text-xs text-white/70">Today's Date</p>
-                  <p className="text-sm font-mono text-white">
-                    {currentTime.toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
+          <div className={`mt-5 grid grid-cols-2 gap-3 text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+            <div className={`rounded-2xl border px-3 py-2 ${darkMode ? 'border-white/10 bg-white/5' : 'border-slate-200 bg-slate-50'}`}>
+              <span className="block text-[11px] uppercase tracking-[0.22em] text-slate-400">Time</span>
+              <span className="mt-1 block font-mono text-sm">{currentTime.toLocaleTimeString()}</span>
             </div>
-          </div>
-        </div>
-
-        {/* Bottom Section */}
-        <div className="mt-8 pt-6 border-t border-white/20">
-          <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
-            <div className="flex items-center space-x-2 text-white/70 text-sm">
-              <span>©</span>
-              <span>{new Date().getFullYear()}</span>
-              <span>Party Budget Planner</span>
-              <span className="hidden sm:inline">•</span>
-              <span className="hidden sm:inline">All rights reserved</span>
-            </div>
-            
-            <div className="flex items-center space-x-4 text-sm">
-              <button className="text-white/70 hover:text-white transition-colors duration-200 flex items-center space-x-1">
-                <span>🌟</span>
-                <span>Rate this app</span>
-              </button>
-              <button className="text-white/70 hover:text-white transition-colors duration-200 flex items-center space-x-1">
-                <span>💬</span>
-                <span>Feedback</span>
-              </button>
+            <div className={`rounded-2xl border px-3 py-2 ${darkMode ? 'border-white/10 bg-white/5' : 'border-slate-200 bg-slate-50'}`}>
+              <span className="block text-[11px] uppercase tracking-[0.22em] text-slate-400">Date</span>
+              <span className="mt-1 block font-mono text-sm">{currentTime.toLocaleDateString()}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Floating Celebration Message */}
-      <div className="text-center mt-6 px-4">
-        <p className="text-white/90 text-base sm:text-lg font-medium animate-pulse">
-          🎊 Happy Planning! Make your party memorable! 🎊
-        </p>
-        <div className="mt-3 flex justify-center space-x-2">
-          {[...Array(5)].map((_, i) => (
-            <span 
-              key={i}
-              className="text-yellow-400 animate-bounce text-sm"
-              style={{ animationDelay: `${i * 0.1}s` }}
-            >
-              ⭐
-            </span>
-          ))}
-        </div>
+      <div className={`mt-4 text-center text-xs uppercase tracking-[0.24em] ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>
+        Party Budget Planner · {new Date().getFullYear()}
       </div>
     </footer>
   )

@@ -2,63 +2,48 @@ import React from 'react';
 
 function Header({ darkMode, toggleDarkMode, isMobileMenuOpen, setIsMobileMenuOpen, hasUnsavedChanges }) {
   return (
-    <div className={`text-center mb-6 sm:mb-10 relative ${
-      hasUnsavedChanges ? 'mt-24 sm:mt-20' : ''
+    <div className={`relative mb-6 sm:mb-8 ${
+      hasUnsavedChanges ? 'mt-24 sm:mt-20' : 'mt-6 sm:mt-8'
     }`}>
       {/* Mobile Menu Button - Only visible on mobile */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className={`mobile-menu-container absolute -top-10 right-2 p-2 rounded-full shadow-lg transform hover:scale-110 transition-all duration-200 block sm:hidden z-10 ${
+        className={`mobile-menu-container absolute right-0 top-0 z-20 block rounded-full p-2.5 shadow-lg transition-all duration-200 hover:-translate-y-0.5 sm:hidden ${
           darkMode 
-            ? 'bg-gray-700 text-white hover:bg-gray-600' 
-            : 'bg-white text-gray-800 hover:bg-gray-100'
+            ? 'bg-slate-900 text-white hover:bg-slate-800' 
+            : 'bg-white text-slate-800 hover:bg-slate-50'
         }`}
         title="Menu"
       >
-        <span className="text-lg">
+        <span className="text-lg leading-none">
           {isMobileMenuOpen ? '✕' : '☰'}
-        </span>
-      </button>
-
-      {/* Desktop Dark Mode Toggle - Only visible on desktop */}
-      <button
-        onClick={toggleDarkMode}
-        className={`absolute top-0 right-0 p-3 rounded-full shadow-lg transform hover:scale-110 transition-all duration-200 hidden sm:block z-10 ${
-          darkMode 
-            ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-300' 
-            : 'bg-gray-800 text-yellow-400 hover:bg-gray-700'
-        }`}
-        title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-      >
-        <span className="text-xl">
-          {darkMode ? '☀️' : '🌙'}
         </span>
       </button>
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className={`mobile-menu-container fixed top-0 right-0 w-80 h-screen z-50 shadow-2xl sm:hidden transform transition-all duration-300 ease-in-out animate-slide-in-right ${
+        <div className={`mobile-menu-container fixed right-0 top-0 z-50 h-screen w-80 transform shadow-2xl transition-all duration-300 ease-in-out animate-slide-in-right sm:hidden ${
           darkMode 
-            ? 'bg-gray-900/95 backdrop-blur-sm' 
-            : 'bg-white/95 backdrop-blur-sm'
+            ? 'bg-slate-950/95 backdrop-blur-xl' 
+            : 'bg-white/95 backdrop-blur-xl'
         }`}>
           <div className="flex flex-col h-full">
             {/* Menu Header */}
             <div className={`p-6 border-b ${
-              darkMode ? 'border-gray-700' : 'border-gray-200'
+              darkMode ? 'border-white/10' : 'border-slate-200'
             }`}>
               <div className="flex items-center justify-between">
-                <h3 className={`text-xl font-bold ${
-                  darkMode ? 'text-white' : 'text-gray-800'
+                <h3 className={`font-display text-xl font-bold ${
+                  darkMode ? 'text-white' : 'text-slate-900'
                 }`}>
                   Menu
                 </h3>
                 <button
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`p-2 rounded-full transition-all duration-200 ${
+                  className={`rounded-full p-2 transition-all duration-200 ${
                     darkMode 
-                      ? 'text-gray-400 hover:text-white hover:bg-gray-800' 
-                      : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
+                      ? 'text-slate-400 hover:bg-white/5 hover:text-white' 
+                      : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                   }`}
                 >
                   <span className="text-xl">✕</span>
@@ -74,10 +59,10 @@ function Header({ darkMode, toggleDarkMode, isMobileMenuOpen, setIsMobileMenuOpe
                     toggleDarkMode();
                     setIsMobileMenuOpen(false);
                   }}
-                  className={`w-full flex items-center space-x-3 p-4 rounded-xl transition-all duration-200 ${
+                  className={`flex w-full items-center space-x-3 rounded-2xl p-4 text-left transition-all duration-200 ${
                     darkMode 
-                      ? 'bg-yellow-400 text-gray-900 hover:bg-yellow-300' 
-                      : 'bg-gray-800 text-yellow-400 hover:bg-gray-700'
+                      ? 'bg-amber-300 text-slate-950 hover:bg-amber-200' 
+                      : 'bg-slate-900 text-amber-300 hover:bg-slate-800'
                   }`}
                 >
                   <span className="text-xl">
@@ -92,10 +77,10 @@ function Header({ darkMode, toggleDarkMode, isMobileMenuOpen, setIsMobileMenuOpe
 
             {/* Menu Footer */}
             <div className={`p-6 border-t ${
-              darkMode ? 'border-gray-700' : 'border-gray-200'
+              darkMode ? 'border-white/10' : 'border-slate-200'
             }`}>
-              <p className={`text-sm text-center ${
-                darkMode ? 'text-gray-400' : 'text-gray-600'
+              <p className={`text-center text-sm ${
+                darkMode ? 'text-slate-400' : 'text-slate-600'
               }`}>
                 Party Budget Planner
               </p>
@@ -103,31 +88,72 @@ function Header({ darkMode, toggleDarkMode, isMobileMenuOpen, setIsMobileMenuOpe
           </div>
         </div>
       )}
-      
-      <div className="flex flex-col sm:flex-row items-center justify-center mb-4 sm:mb-6 mt-12 sm:mt-0 px-4 sm:px-0 space-y-4 sm:space-y-0 sm:space-x-6">
-        {/* Custom Logo */}
-        <div className="relative">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 bg-gradient-to-br from-yellow-400 via-pink-500 to-purple-600 rounded-2xl shadow-2xl flex items-center justify-center transform rotate-12 hover:rotate-0 transition-transform duration-300">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-22 lg:h-22 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-              <div className="relative">
-                <span className="text-3xl sm:text-4xl lg:text-5xl animate-bounce">🎉</span>
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-ping"></div>
-              </div>
-            </div>
+
+      <div className="mx-auto flex max-w-5xl flex-col items-start gap-5 px-1 pt-12 sm:flex-row sm:items-center sm:gap-6 sm:px-0 sm:pt-6">
+        <div className="relative shrink-0">
+          <div className={`relative flex h-20 w-20 items-center justify-center rounded-[1.5rem] shadow-[0_18px_45px_-20px_rgba(15,23,42,0.65)] ${
+            darkMode
+              ? 'bg-gradient-to-br from-fuchsia-500 via-violet-500 to-amber-300'
+              : 'bg-gradient-to-br from-rose-400 via-fuchsia-500 to-amber-300'
+          }`}>
+            <div className="absolute inset-2 rounded-[1.15rem] bg-white/70 backdrop-blur-sm" />
+            <span className="relative text-3xl">🎉</span>
           </div>
-          {/* Logo sparkles */}
-          <div className="absolute -top-2 -left-2 w-4 h-4 bg-yellow-300 rounded-full animate-pulse opacity-70"></div>
-          <div className="absolute -bottom-1 -right-3 w-3 h-3 bg-pink-300 rounded-full animate-pulse opacity-60"></div>
-          <div className="absolute top-1 -right-4 w-2 h-2 bg-purple-300 rounded-full animate-pulse opacity-80"></div>
+          <span className="absolute -right-2 top-2 h-3 w-3 rounded-full bg-amber-300/90 shadow-sm" />
+          <span className="absolute -bottom-1 left-3 h-2.5 w-2.5 rounded-full bg-rose-300/80 shadow-sm" />
         </div>
-        
-        <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white drop-shadow-2xl animate-pulse text-center sm:text-left">
-          Party Budget Planner
-        </h1>
+
+        <div className="space-y-3">
+          <div className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] ${
+            darkMode
+              ? 'border-white/10 bg-white/5 text-slate-300'
+              : 'border-white/70 bg-white/70 text-slate-600'
+          }`}>
+            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            Party planning workspace
+          </div>
+          <div>
+            <h1 className={`font-display text-3xl font-extrabold tracking-tight sm:text-5xl ${
+              darkMode ? 'text-white' : 'text-slate-950'
+            }`}>
+              Party Budget Planner
+            </h1>
+            <p className={`mt-3 max-w-2xl text-sm leading-relaxed sm:text-base ${
+              darkMode ? 'text-slate-300' : 'text-slate-600'
+            }`}>
+              Split costs, track people, and keep the output polished enough to share without explaining the math twice.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 pt-1">
+            {['Split items', 'Track drinkers', 'Export PDF'].map((label) => (
+              <span
+                key={label}
+                className={`rounded-full border px-3 py-1 text-xs font-medium ${
+                  darkMode
+                    ? 'border-white/10 bg-white/5 text-slate-300'
+                    : 'border-slate-200 bg-white/75 text-slate-600'
+                }`}
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="ml-auto hidden sm:block">
+          <button
+            onClick={toggleDarkMode}
+            className={`rounded-full px-4 py-2 text-sm font-semibold shadow-lg transition-all duration-200 hover:-translate-y-0.5 ${
+              darkMode
+                ? 'bg-amber-300 text-slate-950 hover:bg-amber-200'
+                : 'bg-slate-950 text-amber-300 hover:bg-slate-800'
+            }`}
+            title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {darkMode ? 'Light mode' : 'Dark mode'}
+          </button>
+        </div>
       </div>
-      <p className="text-white/90 text-base sm:text-lg lg:text-xl font-medium drop-shadow-lg px-4">
-        Plan your perfect party within budget!
-      </p>
     </div>
   );
 }
