@@ -51,6 +51,7 @@ function App() {
   });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [createPartyPrompt, setCreatePartyPrompt] = useState(null);
+  const [renamePartyPrompt, setRenamePartyPrompt] = useState(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
 
   const selectedParty = parties.find((party) => party._id === selectedPartyId) ?? null;
@@ -117,6 +118,21 @@ function App() {
     setCreatePartyPrompt(null);
   };
 
+  const promptRenameParty = (defaultName) => {
+    return new Promise((resolve) => {
+      setRenamePartyPrompt({ defaultName, resolve });
+    });
+  };
+
+  const closeRenamePartyPrompt = (result) => {
+    if (!renamePartyPrompt) {
+      return;
+    }
+
+    renamePartyPrompt.resolve(result);
+    setRenamePartyPrompt(null);
+  };
+
   const confirmDeleteParty = (partyName) => {
     return new Promise((resolve) => {
       setDeleteConfirmation({ partyName, resolve });
@@ -176,8 +192,8 @@ function App() {
       return;
     }
 
-    const nextName = prompt('Rename party:', selectedPartyName);
-    const normalizedName = nextName?.trim();
+    const nextPartyName = await promptRenameParty(selectedPartyName);
+    const normalizedName = nextPartyName?.trim();
 
     if (!normalizedName || normalizedName === selectedPartyName) {
       return;
@@ -254,11 +270,28 @@ function App() {
       </div>
 
       {createPartyPrompt && (
-        <CreatePartyModal
+        <PartyNameModal
           defaultName={createPartyPrompt.defaultName}
           darkMode={darkMode}
+          title="Create a new party"
+          description="Give this party a name before you start adding items and people."
+          inputLabel="Party name"
+          confirmLabel="Create party"
           onCancel={() => closeCreatePartyPrompt(null)}
           onCreate={(value) => closeCreatePartyPrompt(value)}
+        />
+      )}
+
+      {renamePartyPrompt && (
+        <PartyNameModal
+          defaultName={renamePartyPrompt.defaultName}
+          darkMode={darkMode}
+          title="Rename party"
+          description="Choose a new name for this party."
+          inputLabel="New party name"
+          confirmLabel="Rename party"
+          onCancel={() => closeRenamePartyPrompt(null)}
+          onCreate={(value) => closeRenamePartyPrompt(value)}
         />
       )}
 
@@ -484,7 +517,16 @@ function App() {
 
 export default App;
 
-function CreatePartyModal({ defaultName, darkMode, onCancel, onCreate }) {
+function PartyNameModal({
+  defaultName,
+  darkMode,
+  title,
+  description,
+  inputLabel,
+  confirmLabel,
+  onCancel,
+  onCreate,
+}) {
   const [partyName, setPartyName] = useState(defaultName);
   const inputRef = useRef(null);
 
@@ -514,15 +556,15 @@ function CreatePartyModal({ defaultName, darkMode, onCancel, onCreate }) {
 
           <div className="min-w-0 flex-1">
             <p className={`font-display text-lg font-semibold ${darkMode ? 'text-white' : 'text-slate-950'}`}>
-              Create a new party
+              {title}
             </p>
             <p className={`mt-1 text-sm leading-relaxed ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
-              Give this party a name before you start adding items and people.
+              {description}
             </p>
 
             <label className="mt-4 block">
               <span className={`mb-2 block text-xs font-semibold uppercase tracking-[0.24em] ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                Party name
+                {inputLabel}
               </span>
               <input
                 ref={inputRef}
@@ -564,7 +606,7 @@ function CreatePartyModal({ defaultName, darkMode, onCancel, onCreate }) {
                 disabled={!canCreate}
                 className="rounded-2xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-950/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Create party
+                {confirmLabel}
               </button>
             </div>
           </div>
