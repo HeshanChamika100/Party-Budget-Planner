@@ -23,6 +23,24 @@ const PDFGenerator = ({
   const generateJPGReport = async () => {
     const currentDate = new Date().toLocaleDateString();
     const currentTime = new Date().toLocaleTimeString();
+    const summarizePeople = (partyPeople, isAlcoholicGroup, maxNames = 8) => {
+      const names = partyPeople
+        .filter((person) => Boolean(person.isAlcoholic) === isAlcoholicGroup)
+        .map((person, index) => person.name?.trim() || `Person ${index + 1}`);
+
+      if (names.length === 0) {
+        return 'None';
+      }
+
+      if (names.length <= maxNames) {
+        return names.join(', ');
+      }
+
+      return `${names.slice(0, maxNames).join(', ')} +${names.length - maxNames} more`;
+    };
+
+    const alcoholicSummary = summarizePeople(people, true);
+    const nonAlcoholicSummary = summarizePeople(people, false);
 
     // Create a temporary div for the report
     const reportElement = document.createElement('div');
@@ -150,24 +168,23 @@ const PDFGenerator = ({
           👥 PARTY PEOPLE
         </h2>
         <div style="background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0;">
-          <div style="overflow: hidden; border-radius: 10px; border: 1px solid #e2e8f0; background: white;">
-            <div style="background: linear-gradient(to right, #7c3aed, #ec4899); color: white; padding: 12px; display: grid; grid-template-columns: 60px 1fr 160px; gap: 12px; font-weight: bold; font-size: 13px;">
-              <div style="text-align: center;">#</div>
-              <div>Name</div>
-              <div style="text-align: center;">Type</div>
+          <div style="background: white; border-radius: 10px; border: 1px solid #e2e8f0; padding: 16px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+            <div>
+              <div style="color: #7c3aed; font-size: 15px; font-weight: 700; margin-bottom: 8px;">
+                🍺 Alcoholic People:
+              </div>
+              <div style="color: #374151; font-size: 14px; line-height: 1.5;">
+                ${alcoholicSummary}
+              </div>
             </div>
-            ${people.map((person, index) => {
-              const personName = person.name || `Person ${index + 1}`;
-              const personType = person.isAlcoholic ? '🍺 Alcoholic' : '🥤 Non-Alcoholic';
-              const bgColor = index % 2 === 0 ? '#ffffff' : '#f8fafc';
-              return `
-                <div style="padding: 12px; display: grid; grid-template-columns: 60px 1fr 160px; gap: 12px; border-bottom: 1px solid #e2e8f0; background: ${bgColor};">
-                  <div style="text-align: center; font-weight: 600; color: #475569;">${index + 1}</div>
-                  <div style="font-weight: 500; color: #111827;">${personName}</div>
-                  <div style="text-align: center; color: ${person.isAlcoholic ? '#7c3aed' : '#059669'}; font-weight: 600;">${personType}</div>
-                </div>
-              `;
-            }).join('')}
+            <div>
+              <div style="color: #059669; font-size: 15px; font-weight: 700; margin-bottom: 8px;">
+                🥤 Non-Alcoholic People:
+              </div>
+              <div style="color: #374151; font-size: 14px; line-height: 1.5;">
+                ${nonAlcoholicSummary}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -176,14 +193,6 @@ const PDFGenerator = ({
         <div style="text-align: center;">
           <div style="font-size: 20px; font-weight: bold; color: #059669; margin-bottom: 20px;">
             GRAND TOTAL: Rs.${totalCost.toLocaleString()}
-          </div>
-        </div>
-        
-        <div style="background: #f1f5f9; padding: 20px; border-radius: 10px; margin-top: 20px;">
-          <h3 style="color: #475569; font-size: 14px; margin-bottom: 15px; font-weight: bold;">ADDITIONAL INFORMATION:</h3>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; font-size: 13px; color: #64748b;">
-            <div>• Alcoholic people: <strong>${alcoholicPeople}</strong> (Cost per person: <strong>Rs.${alcoholicPeople > 0 ? alcoholicCostPerPerson.toLocaleString() : '0'}</strong>)</div>
-            <div>• Non-alcoholic people: <strong>${nonAlcoholicPeople}</strong> (Cost per person: <strong>Rs.${nonAlcoholicPeople > 0 ? nonAlcoholicCostPerPerson.toLocaleString() : '0'}</strong>)</div>
           </div>
         </div>
         
